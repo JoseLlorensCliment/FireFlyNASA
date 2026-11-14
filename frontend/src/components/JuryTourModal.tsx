@@ -38,9 +38,8 @@ export function JuryTourButton({ className }: { className?: string }) {
   return (
     <>
       <button onClick={() => setOpen(true)} aria-haspopup="dialog"
-        className={cn("group relative inline-flex items-center gap-1.5 rounded-lg border border-plasma/50 bg-plasma/10 px-3 py-1.5 text-xs font-medium text-plasma transition-colors hover:bg-plasma/20", className)}>
-        <span className="absolute inset-0 rounded-lg ring-1 ring-plasma/40 motion-safe:animate-pulse" aria-hidden />
-        <Sparkles className="h-3.5 w-3.5" /> Jury guide · Quick tour
+        className={cn("btn h-10 gap-2 border-plasma/40 bg-plasma/[0.08] text-[13px] text-plasma hover:border-plasma/70 hover:bg-plasma/[0.14] hover:text-plasma", className)}>
+        <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} /> Jury guide · Quick tour
       </button>
       {open && createPortal(<JuryTourModal onClose={close} />, document.body)}
     </>
@@ -88,9 +87,9 @@ export function JuryTourModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70 [animation:enter-fade_200ms_ease_both]" onClick={onClose} />
       <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="tour-title"
-        className="relative w-full max-w-lg rounded-2xl border border-line bg-surface shadow-2xl outline-none">
+        className="pop-enter relative w-full max-w-lg rounded-xl border border-line-strong bg-surface shadow-[0_24px_64px_rgb(0_0_0/0.6)] outline-none">
         <div className="flex items-center justify-between border-b border-line/70 px-5 py-3">
           <div className="label text-plasma">Jury quick tour · under 60 s</div>
           <button className="rounded-md p-1 text-muted hover:bg-raised hover:text-fg" aria-label="Close tour" onClick={onClose}><X className="h-4 w-4" /></button>

@@ -5,7 +5,7 @@ import { AlertOctagon, AlertTriangle, Check, Info, Plus, X } from "lucide-react"
 import { api } from "@/services/api";
 import { Badge, Card, CardHeader, ErrorState, Loading, PageHeader } from "@/components/ui/primitives";
 import { AtmosphereMap } from "@/components/AtmosphereMap";
-import { Plot, PALETTE } from "@/components/Plot";
+import { INK, Plot, SERIES, SURFACE, SYMBOLS } from "@/components/Plot";
 import type { CompareResult, CompareVariable } from "@/types/api";
 import { cn, fmtNum, QUALITY_META } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ const STATUS: Record<CompareVariable["status"], { label: string; cls: string; he
 };
 
 const WARN_ICON = { critical: AlertOctagon, warning: AlertTriangle, info: Info };
-const WARN_CLS = { critical: "border-ember/40 bg-ember/5", warning: "border-warn/30 bg-warn/5", info: "border-plasma/30 bg-plasma/5" };
+const WARN_CLS = { critical: "border-ember/35 bg-ember/[0.06]", warning: "border-warn/30 bg-warn/[0.05]", info: "border-line bg-raised/40" };
 const WARN_ICON_CLS = { critical: "text-ember", warning: "text-warn", info: "text-plasma" };
 
 export function Picker({ selected, onChange }: { selected: string[]; onChange: (ids: string[]) => void }) {
@@ -37,22 +37,22 @@ export function Picker({ selected, onChange }: { selected: string[]; onChange: (
   return (
     <div className="flex flex-wrap items-center gap-2">
       {selected.map((acc, i) => (
-        <span key={acc} className="inline-flex items-center gap-2 rounded-lg border border-line bg-raised py-1 pl-2.5 pr-1 text-sm">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ background: PALETTE[i] }} />
+        <span key={acc} className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-raised/60 pl-3 pr-1 text-sm">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: SERIES[i] }} />
           {label(acc)} <span className="num text-[11px] text-muted">{acc}</span>
-          <button aria-label={`Remove ${acc}`} className="rounded p-0.5 text-muted hover:bg-line hover:text-fg"
+          <button aria-label={`Remove ${acc}`} className="grid h-7 w-7 place-items-center rounded-md text-muted transition-colors duration-200 hover:bg-line hover:text-fg"
             onClick={() => onChange(selected.filter((s) => s !== acc))}><X className="h-3.5 w-3.5" /></button>
         </span>
       ))}
       {selected.length < 4 && (
         <div className="relative">
-          <button className="btn h-8" onClick={() => setOpen((o) => !o)}><Plus className="h-3.5 w-3.5" /> Add investigation</button>
+          <button className="btn h-9" aria-expanded={open} aria-haspopup="listbox" onClick={() => setOpen((o) => !o)}><Plus className="h-3.5 w-3.5" /> Add investigation</button>
           {open && (
             <>
               <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-              <div className="absolute left-0 z-30 mt-1 max-h-80 w-80 overflow-auto rounded-lg border border-line bg-surface p-1 shadow-2xl">
+              <div className="pop-enter absolute left-0 z-30 mt-1.5 max-h-80 w-80 origin-top-left overflow-auto rounded-lg border border-line-strong bg-surface p-1 shadow-[0_16px_40px_rgb(0_0_0/0.55)]">
                 {data?.filter((d) => !selected.includes(d.accession)).map((d) => (
-                  <button key={d.accession} className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left text-sm hover:bg-raised"
+                  <button key={d.accession} className="flex h-10 w-full items-center justify-between gap-2 rounded-md px-2.5 text-left text-sm transition-colors duration-150 hover:bg-raised"
                     onClick={() => { onChange([...selected, d.accession]); setOpen(false); }}>
                     <span className="truncate">{d.acronym ?? d.title}</span>
                     <span className="num shrink-0 text-[11px] text-muted">{d.n_tests} rows</span>
@@ -103,19 +103,22 @@ function RangeChart({ data }: { data: CompareResult }) {
     <div className="grid gap-2 md:grid-cols-3">
       {vars.map((v) => (
         <div key={v.key}>
-          <div className="px-3 pt-3 text-xs font-medium text-fg/90">{v.label} <span className="text-muted">({v.unit})</span></div>
-          <Plot height={60 + 34 * names.length}
+          <div className="px-3 pt-3 text-xs font-medium text-fg">{v.label} <span className="font-normal text-muted">({v.unit})</span></div>
+          <Plot height={64 + 34 * names.length} label={`${v.label} range per investigation`}
             data={data.investigations.map((inv, i) => {
               const s = v.per_investigation[inv.accession];
               const has = s && s.n > 0;
               return {
                 type: "scatter", mode: "lines+markers", name: names[i], showlegend: false,
                 x: has ? [s.min, s.max] : [], y: [names[i], names[i]],
-                line: { color: PALETTE[i], width: 8 }, marker: { color: PALETTE[i], size: 10 },
-                hovertemplate: `${names[i]}: %{x}<extra></extra>`,
+                line: { color: SERIES[i], width: 5 },
+                marker: { color: SERIES[i], size: 9, symbol: SYMBOLS[i], line: { color: SURFACE, width: 2 } },
+                hovertemplate: `<b>${names[i]}</b><br>%{x}<extra></extra>`,
               } as Plotly.Data;
             })}
-            layout={{ margin: { l: 90, r: 12, t: 6, b: 28 }, yaxis: { automargin: true, categoryorder: "array", categoryarray: [...names].reverse() } }} />
+            layout={{ margin: { l: 8, r: 14, t: 6, b: 30 }, xaxis: { showline: false },
+              yaxis: { automargin: true, showgrid: false, categoryorder: "array", categoryarray: [...names].reverse(),
+                tickfont: { color: INK.secondary, size: 11, family: "Inter, sans-serif" } } }} />
         </div>
       ))}
     </div>
@@ -133,11 +136,11 @@ export default function Compare() {
     o2: p.o2, o2_min: p.o2_min, o2_max: p.o2_max, pressure: p.pressure as number, inverse: p.inverse,
     label: [p.fuel, p.outcome].filter(Boolean).join(" · "),
   })), [data]);
-  const groupColor = (g: string) => PALETTE[Math.max(0, data?.investigations.findIndex((i) => (i.acronym ?? i.accession) === g) ?? 0)];
+  const groupOrder = data?.investigations.map((i) => i.acronym ?? i.accession) ?? [];
   const missingP = data ? data.investigations.filter((i) => !data.points.some((p) => p.accession === i.accession && p.pressure !== null)) : [];
 
   return (
-    <div>
+    <div className="page-enter">
       <PageHeader eyebrow="Module 2" title="Scientific comparator">
         Compare 2–4 investigations on harmonized variables only. Differences in fuel phase, data type and variable definitions
         are flagged automatically — a comparison is never assumed to be like-for-like.
@@ -145,11 +148,11 @@ export default function Compare() {
 
       <Card className="mb-5 p-4">
         <Picker selected={ids} onChange={setIds} />
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-muted">Presets:</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4 text-xs">
+          <span className="text-muted">Presets</span>
           {PRESETS.map((p) => (
-            <button key={p.label} onClick={() => setIds(p.ids)}
-              className="rounded-full border border-line px-2.5 py-1 text-muted hover:border-plasma/50 hover:text-fg">{p.label}</button>
+            <button key={p.label} onClick={() => setIds(p.ids)} className="chip"
+              aria-pressed={p.ids.length === ids.length && p.ids.every((x) => ids.includes(x))}>{p.label}</button>
           ))}
         </div>
       </Card>
@@ -166,7 +169,7 @@ export default function Compare() {
                 return (
                   <div key={w.title} className={cn("flex gap-3 rounded-xl border p-4 text-sm", WARN_CLS[w.level])}>
                     <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", WARN_ICON_CLS[w.level])} />
-                    <div><div className="font-medium text-fg">{w.title}</div><div className="mt-1 text-[13px] leading-relaxed text-fg/80">{w.text}</div></div>
+                    <div><div className="font-semibold text-fg">{w.title}</div><div className="mt-1 text-[13px] leading-relaxed text-fg-2">{w.text}</div></div>
                   </div>
                 );
               })}
@@ -178,12 +181,12 @@ export default function Compare() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-line bg-raised/40">
+                  <tr className="border-b border-line bg-raised/50">
                     <th className="w-48 px-4 py-3 text-xs font-medium text-muted">Variable</th>
                     {data.investigations.map((inv, i) => (
                       <th key={inv.accession} className="px-4 py-3">
-                        <Link to={`/experiments/${inv.accession}`} className="flex items-center gap-2 hover:text-plasma">
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: PALETTE[i] }} />
+                        <Link to={`/experiments/${inv.accession}`} className="flex items-center gap-2 transition-colors duration-200 hover:text-plasma">
+                          <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: SERIES[i] }} />
                           <span className="font-semibold">{inv.acronym ?? inv.accession}</span>
                         </Link>
                       </th>
@@ -193,7 +196,7 @@ export default function Compare() {
                 </thead>
                 <tbody>
                   {data.attributes.map((a) => (
-                    <tr key={a.label} className="border-b border-line/50">
+                    <tr key={a.label} className="border-b border-line/50 transition-colors duration-150 hover:bg-raised/40">
                       <td className="px-4 py-2.5 text-xs text-muted">{a.label}</td>
                       {data.investigations.map((inv) => <td key={inv.accession} className="px-4 py-2.5 text-[13px] text-fg/90">{a.values[inv.accession] || "—"}</td>)}
                       <td className="px-4 py-2.5">
@@ -203,7 +206,7 @@ export default function Compare() {
                   ))}
                   <tr><td colSpan={data.investigations.length + 2} className="bg-raised/30 px-4 py-1.5 label">Harmonized variables</td></tr>
                   {data.variables.map((v) => (
-                    <tr key={v.key} className="border-b border-line/50 align-top">
+                    <tr key={v.key} className="border-b border-line/50 align-top transition-colors duration-150 hover:bg-raised/40">
                       <td className="px-4 py-3">
                         <div className="text-[13px] font-medium text-fg">{v.label}</div>
                         {v.note && <div className="mt-1 text-[11px] leading-snug text-muted">{v.note}</div>}
@@ -232,14 +235,14 @@ export default function Compare() {
 
           <Card>
             <CardHeader title="Condition envelopes" subtitle="Range of each condition tested (min–max over reporting rows). Empty line = not reported." />
-            <div className="px-2 pb-2"><RangeChart data={data} /></div>
+            <div className="px-3 pb-3"><RangeChart data={data} /></div>
           </Card>
 
           <Card>
             <CardHeader title="Tested atmospheres vs exploration atmospheres"
               subtitle="Every row reporting both O₂ and pressure. Reference atmospheres from the challenge statement; horizontal bars show O₂ ranges or set-point lists." />
-            <div className="px-3 pb-3">
-              {points.length ? <AtmosphereMap points={points} colorFor={groupColor} /> :
+            <div className="px-4 pb-4 pt-2">
+              {points.length ? <AtmosphereMap points={points} groupOrder={groupOrder} /> :
                 <p className="p-6 text-sm text-muted">None of the selected investigations reports both O₂ and pressure per row.</p>}
               {missingP.length > 0 && points.length > 0 && (
                 <p className="px-3 text-xs text-muted">Not shown (O₂ and pressure not both reported): {missingP.map((i) => i.acronym ?? i.accession).join(", ")}.</p>

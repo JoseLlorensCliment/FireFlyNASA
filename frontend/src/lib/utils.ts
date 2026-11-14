@@ -28,6 +28,9 @@ export const PHASE_LABEL: Record<string, string> = {
   solid: "Solid fuels", liquid: "Liquid droplets", gas: "Gaseous flames", aerosol: "Aerosol / dust",
 };
 
+/** Fuel-phase identity colour — the same categorical slot everywhere (Dashboard timeline, cards, charts). */
+export const PHASE_COLOR: Record<string, string> = { solid: "#3987e5", liquid: "#d95926", gas: "#199e70", aerosol: "#c98500" };
+
 export const ROLE_META: Record<string, { label: string; color: string; desc: string }> = {
   prevention: { label: "Prevention", color: "text-flame border-flame/40 bg-flame/10", desc: "Material flammability, ignition and flame spread" },
   detection: { label: "Detection", color: "text-plasma border-plasma/40 bg-plasma/10", desc: "Smoke and aerosol measurement" },

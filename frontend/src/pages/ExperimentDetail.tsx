@@ -5,7 +5,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { ArrowLeft, ExternalLink, Info } from "lucide-react";
 import { api } from "@/services/api";
 import { Badge, Card, CardHeader, ErrorState, Loading, RoleBadge } from "@/components/ui/primitives";
-import { Plot } from "@/components/Plot";
+import { Plot, SERIES, SYMBOLS, marker } from "@/components/Plot";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import type { InvestigationDetail, Quantity, TableInfo, TestRow } from "@/types/api";
 import { cn, fmtBytes, fmtNum, PHASE_LABEL, QUALITY_META } from "@/lib/utils";
@@ -107,15 +107,24 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
     const rows = all.data?.items ?? [];
     const pts = rows.filter((r) => r.o2 !== null && r.pressure !== null);
     if (pts.length < 3) return null;
-    const groups = Array.from(new Set(pts.map((r) => r.outcome ?? r.fuel ?? "rows")));
-    return groups.map((g) => {
-      const s = pts.filter((r) => (r.outcome ?? r.fuel ?? "rows") === g);
+    // Categorical groups in a fixed slot order (by frequency); colour + marker shape (composite encoding) because
+    // scatter plots only clear the colour-blind gates for 3 hues; beyond 6 groups the tail folds into "Other".
+    const key = (r: TestRow) => r.outcome ?? r.fuel ?? "rows";
+    const counts = new Map<string, number>();
+    pts.forEach((r) => counts.set(key(r), (counts.get(key(r)) ?? 0) + 1));
+    const ranked = [...counts.keys()].sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0));
+    const kept = ranked.slice(0, ranked.length > 6 ? 5 : 6);
+    const groupOf = (r: TestRow) => (kept.includes(key(r)) ? key(r) : "Other");
+    const groups = [...kept, ...(ranked.length > kept.length ? ["Other"] : [])];
+    return groups.map((g, i) => {
+      const s = pts.filter((r) => groupOf(r) === g);
+      const color = g === "Other" ? "#6b7488" : SERIES[i];
       return {
         type: "scatter", mode: "markers", name: g,
         x: s.map((r) => r.o2), y: s.map((r) => r.pressure),
-        marker: { size: 7, opacity: 0.8, line: { width: 0 } },
+        marker: marker(color, { symbol: SYMBOLS[i % SYMBOLS.length], opacity: 0.9 }),
         text: s.map((r) => `${r.fuel_raw ?? ""}`),
-        hovertemplate: "O₂ %{x:.1f}% · %{y:.0f} kPa<br>%{text}<extra>" + g + "</extra>",
+        hovertemplate: "<b>" + g + "</b><br>O₂ %{x:.1f}% · %{y:.0f} kPa<br>%{text}<extra></extra>",
       } as Plotly.Data;
     });
   }, [all.data]);
@@ -145,9 +154,13 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
       {chart && (
         <Card>
           <CardHeader title="Test conditions: O₂ vs pressure" subtitle="Each point is one row, coloured by reported outcome (or fuel). Values harmonized to % and kPa." />
-          <div className="px-3 pb-2">
-            <Plot height={320} data={chart}
-              layout={{ xaxis: { title: { text: "O₂ (%)" } }, yaxis: { title: { text: "Pressure (kPa)" } }, legend: { orientation: "h", y: 1.12 } }} />
+          <div className="px-4 pb-3 pt-2">
+            <Plot height={340} data={chart} label="Test conditions: oxygen versus pressure"
+              layout={{ xaxis: { title: { text: "O₂ (%)" } }, yaxis: { title: { text: "Pressure (kPa)" } },
+                legend: { orientation: "h", y: 1.02, x: 0, yanchor: "bottom" }, margin: { l: 56, r: 16, t: 36, b: 48 } }}
+              table={{ columns: ["Row", "Fuel / sample", "O₂ (%)", "Pressure (kPa)", "Outcome"],
+                rows: (all.data?.items ?? []).filter((r) => r.o2 !== null && r.pressure !== null)
+                  .map((r) => [r.row_index + 1, r.fuel_raw ?? "—", Number(r.o2?.toFixed(2)), Number(r.pressure?.toFixed(1)), r.outcome ?? "—"]) }} />
           </div>
         </Card>
       )}
@@ -156,9 +169,9 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
         <CardHeader title="Rows"
           subtitle={raw ? "Original PSI columns, verbatim." : "Harmonized view — hover a value to see the original cell and its quality flag."}
           right={
-            <div className="flex rounded-lg border border-line p-0.5 text-xs">
-              <button className={cn("rounded-md px-2.5 py-1", !raw && "bg-raised text-fg")} onClick={() => setRaw(false)}>Harmonized</button>
-              <button className={cn("rounded-md px-2.5 py-1", raw && "bg-raised text-fg")} onClick={() => setRaw(true)}>Original</button>
+            <div className="seg" role="group" aria-label="Row view">
+              <button aria-pressed={!raw} onClick={() => setRaw(false)}>Harmonized</button>
+              <button aria-pressed={raw} onClick={() => setRaw(true)}>Original</button>
             </div>
           } />
         {isLoading && <Loading />}
@@ -166,8 +179,8 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
         {data && (
           <>
             <div className="max-h-[520px] overflow-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-surface">
+              <table className="data-table">
+                <thead>
                   <tr className="border-b border-line">
                     <th className="px-3 py-2 font-medium text-muted">#</th>
                     {raw
@@ -185,7 +198,7 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
                 </thead>
                 <tbody>
                   {data.items.map((r: TestRow) => (
-                    <tr key={r.id} className="border-b border-line/50 hover:bg-raised/50">
+                    <tr key={r.id}>
                       <td className="num px-3 py-1.5 text-muted">{r.row_index + 1}</td>
                       {raw
                         ? t.columns.filter(Boolean).map((c) => <td key={c} className="whitespace-nowrap px-3 py-1.5">{r.raw[c] || <span className="text-muted/40">·</span>}</td>)
@@ -207,8 +220,8 @@ function TablePanel({ acc, t }: { acc: string; t: TableInfo }) {
               <div className="flex items-center justify-between border-t border-line px-4 py-2 text-xs text-muted">
                 <span className="num">{page * size + 1}–{Math.min((page + 1) * size, data.total)} of {data.total}</span>
                 <div className="flex gap-2">
-                  <button className="btn h-7" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</button>
-                  <button className="btn h-7" disabled={(page + 1) * size >= data.total} onClick={() => setPage((p) => p + 1)}>Next</button>
+                  <button className="btn h-8" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Previous</button>
+                  <button className="btn h-8" disabled={(page + 1) * size >= data.total} onClick={() => setPage((p) => p + 1)}>Next</button>
                 </div>
               </div>
             )}
@@ -261,7 +274,7 @@ function Overview({ inv }: { inv: InvestigationDetail }) {
             <CardHeader title="Related investigations" />
             <div className="p-2">
               {inv.related.map((r) => (
-                <Link key={r.accession} to={`/experiments/${r.accession}`} className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-raised">
+                <Link key={r.accession} to={`/experiments/${r.accession}`} className="flex h-10 items-center justify-between rounded-lg px-3 text-sm transition-colors duration-200 hover:bg-raised/60">
                   <span className="truncate">{r.acronym ?? r.title}</span><span className="num ml-2 text-xs text-muted">{r.accession}</span>
                 </Link>
               ))}
@@ -289,10 +302,12 @@ export default function ExperimentDetail() {
   if (error) return <ErrorState error={error} />;
   if (!inv) return null;
 
-  const tabCls = "rounded-md px-3 py-1.5 text-sm text-muted data-[state=active]:bg-raised data-[state=active]:text-fg";
+  const tabCls = "inline-flex h-9 items-center rounded-md px-3.5 text-sm text-muted transition-colors duration-200 hover:text-fg data-[state=active]:bg-raised data-[state=active]:text-fg data-[state=active]:shadow-[0_1px_2px_rgb(0_0_0/0.4)]";
   return (
-    <div>
-      <Link to="/experiments" className="mb-4 inline-flex items-center gap-1 text-xs text-muted hover:text-fg"><ArrowLeft className="h-3.5 w-3.5" /> All experiments</Link>
+    <div className="page-enter">
+      <Link to="/experiments" className="group mb-5 inline-flex h-8 items-center gap-1.5 text-xs text-muted transition-colors duration-200 hover:text-fg">
+        <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-200 ease-out-strong group-hover:-translate-x-0.5" /> All experiments
+      </Link>
       <header className="mb-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="num text-xs text-muted">{inv.accession}</span>
@@ -300,10 +315,10 @@ export default function ExperimentDetail() {
           {inv.fuel_phase && <Badge>{PHASE_LABEL[inv.fuel_phase]}</Badge>}
           {inv.roles.map((r) => <RoleBadge key={r} role={r} />)}
         </div>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+        <h1 className="display mt-3 text-[26px] md:text-[32px]">
           {inv.acronym && <span className="text-flame">{inv.acronym} · </span>}{inv.title}
         </h1>
-        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        <div className="mt-4 flex flex-wrap gap-2 text-xs">
           <a className="btn h-8" href={inv.psi_url} target="_blank" rel="noreferrer">Open in NASA PSI <ExternalLink className="h-3 w-3" /></a>
           {inv.doi && <a className="btn h-8" href={`https://doi.org/${inv.doi}`} target="_blank" rel="noreferrer">Dataset DOI {inv.doi} <ExternalLink className="h-3 w-3" /></a>}
           {inv.hardware_link && <a className="btn h-8" href={inv.hardware_link} target="_blank" rel="noreferrer">Hardware <ExternalLink className="h-3 w-3" /></a>}
@@ -312,7 +327,7 @@ export default function ExperimentDetail() {
       </header>
 
       <Tabs.Root defaultValue="overview">
-        <Tabs.List className="mb-4 flex flex-wrap gap-1 rounded-lg border border-line bg-surface p-1">
+        <Tabs.List className="mb-5 flex flex-wrap gap-1 rounded-lg border border-line bg-surface p-1" aria-label="Investigation sections">
           <Tabs.Trigger value="overview" className={tabCls}>Overview</Tabs.Trigger>
           <Tabs.Trigger value="data" className={tabCls}>Test data <span className="num ml-1 text-xs">({inv.n_tests})</span></Tabs.Trigger>
           <Tabs.Trigger value="pubs" className={tabCls}>Publications <span className="num ml-1 text-xs">({inv.publications.length})</span></Tabs.Trigger>

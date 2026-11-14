@@ -64,35 +64,42 @@ export function EarthSpinoffs() {
   return (
     <section className="card" aria-labelledby="spinoffs-title">
       <div className="border-b border-line/70 px-5 py-4">
-        <div className="label text-ok">Back on Earth</div>
-        <h3 id="spinoffs-title" className="mt-1 text-sm font-semibold">How microgravity fire research pays off on the ground</h3>
-        <p className="mt-0.5 text-xs text-muted">Each card links to the PSI investigations behind it and to the NASA source of the claim.</p>
+        <div className="eyebrow text-ok">Back on Earth</div>
+        <h3 id="spinoffs-title" className="mt-1.5 text-[15px] font-semibold tracking-[-0.01em]">How microgravity fire research pays off on the ground</h3>
+        <p className="mt-1 text-xs text-muted">Each card links to the PSI investigations behind it and to the NASA source of the claim.</p>
       </div>
       <div className="grid gap-3 p-4 md:grid-cols-2">
         {BENEFITS.map((b) => {
           const Icon = b.icon;
           return (
-            <article key={b.title} className="flex flex-col rounded-xl border border-line bg-raised/40 p-4">
-              <div className="flex items-center gap-2.5">
-                <span className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-bg/60"><Icon className={`h-4 w-4 ${b.tone}`} /></span>
-                <h4 className="text-sm font-semibold">{b.title}</h4>
+            <article key={b.title} className="card-inset flex flex-col p-5">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line bg-surface">
+                  <Icon className={`h-[18px] w-[18px] ${b.tone}`} strokeWidth={1.8} />
+                </span>
+                <h4 className="text-[15px] font-semibold tracking-[-0.01em]">{b.title}</h4>
               </div>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
+              <div className="mt-3 flex flex-wrap gap-1.5">
                 {b.investigations.map((i) => (
-                  <Link key={i.acc} to={`/experiments/${i.acc}`}
-                    className="rounded-md border border-line px-1.5 py-0.5 text-[11px] text-muted hover:border-plasma/50 hover:text-fg">
-                    {i.label} <span className="num">{i.acc}</span>
+                  <Link key={i.acc} to={`/experiments/${i.acc}`} className="chip min-h-[26px] px-2.5 text-[11px]">
+                    {i.label} <span className="num text-muted">{i.acc}</span>
                   </Link>
                 ))}
               </div>
-              <dl className="mt-3 space-y-2 text-[13px] leading-relaxed">
-                <div><dt className="label text-[10px]">In microgravity</dt><dd className="text-fg/85">{b.insight}</dd></div>
-                <div><dt className={`label text-[10px] ${b.tone}`}>On Earth</dt><dd className="text-fg/90">{b.earth}</dd></div>
+              <dl className="mt-4 space-y-3 text-[13px] leading-relaxed">
+                <div>
+                  <dt className="label text-[10px]">In microgravity</dt>
+                  <dd className="mt-1 text-fg-2">{b.insight}</dd>
+                </div>
+                <div className="border-l-2 border-line-strong pl-3">
+                  <dt className={`label text-[10px] ${b.tone}`}>On Earth</dt>
+                  <dd className="mt-1 text-fg">{b.earth}</dd>
+                </div>
               </dl>
-              <div className="mt-auto flex flex-wrap gap-x-3 gap-y-1 pt-3 text-[11px]">
-                <span className="text-muted">Sources:</span>
+              <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line/70 pt-3 text-[11px]" style={{ marginTop: "1rem" }}>
+                <span className="text-muted">Sources</span>
                 {b.sources.map((src) => (
-                  <a key={src.url} href={src.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-plasma hover:underline">
+                  <a key={src.url} href={src.url} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
                     {src.label} <ExternalLink className="h-3 w-3" />
                   </a>
                 ))}

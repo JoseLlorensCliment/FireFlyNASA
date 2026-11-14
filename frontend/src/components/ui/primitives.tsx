@@ -8,10 +8,10 @@ export function Card({ className, children }: { className?: string; children: Re
 
 export function CardHeader({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-line/70 px-5 py-4">
-      <div>
-        <h3 className="text-sm font-semibold text-fg">{title}</h3>
-        {subtitle && <p className="mt-0.5 text-xs text-muted">{subtitle}</p>}
+    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-line/70 px-5 py-4">
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold tracking-[-0.01em] text-fg">{title}</h3>
+        {subtitle && <p className="mt-1 max-w-prose text-xs leading-relaxed text-muted">{subtitle}</p>}
       </div>
       {right}
     </div>
@@ -20,7 +20,7 @@ export function CardHeader({ title, subtitle, right }: { title: ReactNode; subti
 
 export function Badge({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-md border border-line bg-raised px-1.5 py-0.5 text-[11px] font-medium text-muted", className)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-md border border-line bg-raised/60 px-1.5 py-0.5 text-[11px] font-medium leading-4 text-fg-2", className)}>
       {children}
     </span>
   );
@@ -33,10 +33,11 @@ export function RoleBadge({ role }: { role: string }) {
 
 export function Stat({ label, value, hint, accent }: { label: string; value: ReactNode; hint?: ReactNode; accent?: boolean }) {
   return (
-    <Card className="px-5 py-4">
+    <Card className="relative overflow-hidden px-5 py-4">
+      {accent && <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-flame/70 to-transparent" />}
       <div className="label">{label}</div>
-      <div className={cn("num mt-2 text-3xl font-semibold", accent ? "text-flame" : "text-fg")}>{value}</div>
-      {hint && <div className="mt-1 text-xs text-muted">{hint}</div>}
+      <div className={cn("figure mt-2 text-[32px] leading-none", accent && "text-flame")}>{value}</div>
+      {hint && <div className="mt-2 text-xs leading-snug text-muted">{hint}</div>}
     </Card>
   );
 }
@@ -64,10 +65,10 @@ export function ErrorState({ error }: { error: unknown }) {
 
 export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: ReactNode; children?: ReactNode }) {
   return (
-    <header className="mb-6">
-      {eyebrow && <div className="label text-flame/90">{eyebrow}</div>}
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-[28px]">{title}</h1>
-      {children && <div className="mt-2 max-w-3xl text-sm leading-relaxed text-muted">{children}</div>}
+    <header className="mb-7">
+      {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+      <h1 className="display mt-2 text-[26px] md:text-[32px]">{title}</h1>
+      {children && <div className="mt-3 max-w-3xl text-[14px] leading-relaxed text-fg-2">{children}</div>}
     </header>
   );
 }

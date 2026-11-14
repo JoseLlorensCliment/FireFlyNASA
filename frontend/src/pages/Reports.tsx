@@ -42,43 +42,45 @@ export default function Reports() {
   };
 
   return (
-    <div>
+    <div className="page-enter">
       <div className="no-print">
         <PageHeader eyebrow="Module 5" title="Scientific reports">
           Build a report from a research question and 1–4 investigations. Data, comparisons and references come straight from
           the PSI database; the optional AI discussion is drafted only from retrieved NASA sources and keeps its citations.
         </PageHeader>
 
-        <Card className="mb-5">
-          <CardHeader title="Report setup" />
-          <div className="space-y-4 p-5">
+        <Card className="mb-6">
+          <CardHeader title="Report setup" subtitle="Pick a question and the investigations it draws on. Nothing is sent until you generate." />
+          <div className="space-y-5 p-5">
             <label className="block">
               <div className="label mb-1.5">Research question</div>
-              <input className="input h-10" value={question} maxLength={500} onChange={(e) => setQuestion(e.target.value)}
+              <input className="input h-11" value={question} maxLength={500} onChange={(e) => setQuestion(e.target.value)}
                 placeholder="e.g. How does oxygen concentration affect flame extinction?" aria-label="Research question" />
             </label>
             <div>
               <div className="label mb-1.5">Investigations (1–4)</div>
               <Picker selected={ids} onChange={setIds} />
             </div>
-            <div className="flex flex-wrap gap-1.5 text-xs">
-              <span className="text-muted">Templates:</span>
-              {TEMPLATES.map((t) => (
-                <button key={t.q} onClick={() => { setQuestion(t.q); setIds(t.ids); }}
-                  className="rounded-full border border-line px-2.5 py-1 text-muted hover:border-plasma/50 hover:text-fg">{t.q}</button>
-              ))}
+            <div>
+              <div className="label mb-1.5">Start from a template</div>
+              <div className="flex flex-wrap gap-1.5">
+                {TEMPLATES.map((t) => (
+                  <button key={t.q} onClick={() => { setQuestion(t.q); setIds(t.ids); }} aria-pressed={question === t.q}
+                    className="chip h-auto py-1.5 text-left">{t.q}</button>
+                ))}
+              </div>
             </div>
-            <label className="flex items-start gap-2 text-sm">
-              <input type="checkbox" className="mt-1 accent-[#ff7a1a]" checked={ai} onChange={(e) => setAi(e.target.checked)} />
+            <label className="card-inset flex cursor-pointer items-start gap-3 p-3.5 text-sm">
+              <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#ff7a1a]" checked={ai} onChange={(e) => setAi(e.target.checked)} />
               <span>
                 Include AI-assisted discussion <span className="text-muted">(one Groq call with RAG citations)</span>
-                {!aiReady && <span className="block text-xs text-warn">
+                {!aiReady && <span className="mt-1 block text-xs leading-relaxed text-warn">
                   Not available yet: {status.data?.index.ready ? "" : "RAG index not built (see RAG_HANDOFF.md)"}
                   {status.data && !status.data.llm_configured ? " · LLM API key not set" : ""}. The report will note it and still be generated.
                 </span>}
               </span>
             </label>
-            <button className="btn btn-primary" disabled={question.trim().length < 3 || ids.length === 0 || mut.isPending}
+            <button className="btn btn-primary h-10 px-4" disabled={question.trim().length < 3 || ids.length === 0 || mut.isPending}
               onClick={() => mut.mutate({ question: question.trim(), accessions: ids, include_ai: ai })}>
               {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : ai ? <Sparkles className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
               Generate report
@@ -100,9 +102,9 @@ export default function Reports() {
               <button className="btn h-8" onClick={() => window.print()}><Printer className="h-3.5 w-3.5" /> Print / PDF</button>
             </div>
           </div>
-          <article className="report px-6 py-6 md:px-10">
+          <article className="report px-6 py-7 md:px-12 md:py-10">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-              a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer" className="text-plasma hover:underline">{children}</a>,
+              a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer" className="link">{children}</a>,
             }}>{mut.data.markdown}</ReactMarkdown>
           </article>
         </Card>
