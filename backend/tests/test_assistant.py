@@ -34,7 +34,22 @@ def test_invalid_citations_are_removed(monkeypatch):
     assert [s["cited"] for s in r["sources"]] == [True, True]
 
 
+def test_openai_groq_citation_brackets_are_normalized(monkeypatch):
+    monkeypatch.setattr(assistant.retriever, "search", lambda q, k, accessions=None: [dict(c) for c in CHUNKS])
+    monkeypatch.setattr(assistant.retriever, "mentioned_accessions", lambda q: ["PSI-69"])
+    monkeypatch.setattr(assistant, "complete_json", lambda s, u: ({
+        "answer": "FLEX tested CO2 suppression 【S1†L1-L7】 and ambient oxygen 【2†source】. Both are documented.",
+        "evidence": [{"statement": "Suppression was verified", "sources": ["S1"]}],
+        "interpretation": [], "limitations": [], "sufficient": True, "follow_up": []}, "test-model"))
+    r = assistant.ask("What did FLEX test?")
+    assert "[S1]" in r["answer"]
+    assert "[S2]" in r["answer"]
+    assert "【" not in r["answer"]
+    assert len(r["warnings"]) == 0
+
+
 def test_retrieval_only_when_llm_unavailable(monkeypatch):
+    assistant._CACHE.clear()
     monkeypatch.setattr(assistant.retriever, "search", lambda q, k, accessions=None: [dict(c) for c in CHUNKS])
     monkeypatch.setattr(assistant.retriever, "mentioned_accessions", lambda q: [])
 

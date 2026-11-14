@@ -50,10 +50,10 @@ Every number in the app links back to its PSI table cell, investigation page and
 - **RAG pipeline:**
   - **Corpus:** NASA PDFs, PSI records and deterministic summaries of the data tables.
   - **Chunking:** page-aware chunks with metadata (title, investigation, page, URL).
-  - **Embeddings:** Google `gemini-embedding-001`.
+  - **Embeddings:** Dual-mode support — local `fastembed` (`BAAI/bge-small-en-v1.5`, 384 dims, fast CPU execution with zero quota limits) or Google `gemini-embedding-001`.
   - **Retrieval:** FAISS, with diversity rules, and every investigation named in the question is guaranteed to be
     covered.
-  - **Answers:** written by **Groq `openai/gpt-oss-120b`** (free plan) in JSON. No AI model runs locally.
+  - **Answers:** written by **Groq `openai/gpt-oss-120b`** (free plan, low latency) or Google Gemini in structured JSON.
 - **Answer rules:**
   - every factual sentence cites `[S#]`;
   - **evidence** (stated in sources) is kept apart from **interpretation**;
