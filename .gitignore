@@ -16,18 +16,15 @@ __pycache__/
 node_modules/
 frontend/dist/
 
-# ---------- Large / regenerable data ----------
-# PSI PDF documents (~175 MB, 70 files): re-download with `python pipeline/fetch_psi.py --docs`
-# or transfer them manually (see RAG_HANDOFF.md). Checksums: data/metadata/psi_documents_inventory.csv
-data/raw/psi/documents/
-# SQLite DB: regenerate in seconds with `python pipeline/build_dataset.py`
-data/processed/flame.db
-# RAG artefacts: chunks, embedding cache, FAISS index (rebuild with pipeline/build_rag_index.py)
-data/processed/rag/
+# ---------- Large archives & temporary caches ----------
+data.zip
+*.zip
+*.tar.gz
+# Embedding cache batches during index build (temporary)
+data/processed/rag/embed_cache/
 data/processed/rag_*/
-*.faiss
 *.npy
-# Local embedding model cache (fastembed)
+# Local embedding model download cache (fastembed auto-downloads on first run)
 data/processed/models/
 
 # ---------- Editors / OS / local tooling ----------
