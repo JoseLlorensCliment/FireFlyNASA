@@ -1,0 +1,42 @@
+{
+  "_about": "Hand-curated, human-reviewable classification of each PSI combustion investigation. Every entry states its basis. Roles: prevention (material flammability / ignition), detection (smoke & aerosol), suppression (extinguishment), fundamental (combustion science & model validation), modeling (ground-based re-analysis of flight data). Edit this file, then re-run pipeline/build_dataset.py.",
+  "sources": {
+    "challenge": "NASA Space Apps 2026 'Flame in Freefall' challenge statement (Background + Potential Considerations)",
+    "psi": "PSI investigation record (objectives / approach / hardware fields)",
+    "factsheet": "NASA GRC experiment fact sheet (data/raw/nasa_docs)"
+  },
+  "investigations": {
+    "PSI-10":  {"fuel_phase": "gas",    "roles": ["fundamental", "prevention"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["oxygen-enriched", "inverse flames"], "basis": "challenge: six ACME experiments, gaseous fuels, same ACME hardware in the CIR; factsheet: ACME secondary objective is spacecraft fire prevention"},
+    "PSI-20":  {"fuel_phase": "gas",    "roles": ["prevention"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["material flammability emulation", "quiescent"], "basis": "challenge: BRE 'was a study of materials flammability in still atmospheres as a function of material properties'"},
+    "PSI-21":  {"fuel_phase": "gas",    "roles": ["fundamental"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["coflow laminar diffusion flames"], "basis": "challenge + psi: ACME laminar gaseous non-premixed flames"},
+    "PSI-22":  {"fuel_phase": "gas",    "roles": ["fundamental"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["electric field", "partial-gravity analogue"], "basis": "challenge: 'Partial gravity was mimicked in ACME's E-FIELD Flames experiment through the effect of the electric field on the ions'"},
+    "PSI-23":  {"fuel_phase": "gas",    "roles": ["fundamental"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["flame structure"], "basis": "challenge + psi: ACME laminar gaseous flames"},
+    "PSI-159": {"fuel_phase": "gas",    "roles": ["fundamental", "prevention"], "hardware_family": "ACME modular hardware (CIR)", "tags": ["oxygen-enriched", "cool flames", "inverse flames"], "basis": "challenge: CFI-G holds the highest-oxygen microgravity tests (oxygen-nitrogen up to 85% O2 from the burner)"},
+    "PSI-25":  {"fuel_phase": "solid",  "roles": ["prevention", "suppression"], "hardware_family": "MSG with SPICE flow duct", "tags": ["material flammability", "flame spread"], "basis": "challenge: BASS-II flammability of solids; MSG with SPICE fan-driven flow duct"},
+    "PSI-26":  {"fuel_phase": "solid",  "roles": ["prevention", "suppression"], "hardware_family": "MSG with SPICE flow duct", "tags": ["material flammability", "flame spread", "inert-gas suppression"], "basis": "psi objectives: (1) material flammability in microgravity, (2) effectiveness of an inert gaseous extinguishing agent"},
+    "PSI-39":  {"fuel_phase": "liquid", "roles": ["fundamental"], "hardware_family": "MDCA (CIR)", "tags": ["droplets", "cool flames"], "basis": "challenge: FLEX, FLEX-2 and CFI burned liquid fuel droplets with the MDCA in the CIR"},
+    "PSI-47":  {"fuel_phase": "aerosol", "roles": ["detection"], "hardware_family": "Hand-held aerosol monitors (P-Trak / DustTrak)", "tags": ["dust vs smoke", "nuisance alarms"], "basis": "challenge: an instrument from SAME/SAME-R was used to detect dust in DAFT and DAFT-2"},
+    "PSI-68":  {"fuel_phase": "liquid", "roles": ["fundamental"], "hardware_family": "MDCA (CIR)", "tags": ["droplets", "pressure effects"], "basis": "challenge: MDCA droplet experiments; psi table varies O2, pressure and flow"},
+    "PSI-69":  {"fuel_phase": "liquid", "roles": ["suppression", "fundamental"], "hardware_family": "MDCA (CIR)", "tags": ["droplets", "CO2 and He suppression", "extinction limits"], "basis": "challenge: 'Suppression was studied in FLEX through dilution of the chamber atmosphere with carbon dioxide and helium'"},
+    "PSI-98":  {"fuel_phase": "solid",  "roles": ["prevention"], "hardware_family": "Saffire flow unit (Cygnus)", "tags": ["large-scale fire", "flame spread"], "basis": "challenge + factsheet: Saffire large-scale flame growth and material flammability in a Cygnus vehicle"},
+    "PSI-99":  {"fuel_phase": "solid",  "roles": ["prevention"], "hardware_family": "Saffire flow unit (Cygnus)", "tags": ["large-scale fire", "material flammability", "1-g vs microgravity"], "basis": "challenge + factsheet: Saffire-II nine samples incl. SIBAL, Nomex, PMMA, silicone"},
+    "PSI-100": {"fuel_phase": "solid",  "roles": ["prevention"], "hardware_family": "Saffire flow unit (Cygnus)", "tags": ["large-scale fire", "flame spread"], "basis": "challenge + factsheet: Saffire-III SIBAL at higher flow velocity"},
+    "PSI-101": {"fuel_phase": "solid",  "roles": ["detection"], "hardware_family": "SAME smoke-detection hardware (MSG)", "tags": ["smoke", "aerosol", "pyrolysis"], "basis": "challenge: fire detection tested in microgravity through SAME and SAME-R"},
+    "PSI-102": {"fuel_phase": "solid",  "roles": ["detection"], "hardware_family": "SAME smoke-detection hardware (MSG)", "tags": ["smoke", "aerosol", "pyrolysis"], "basis": "challenge: fire detection tested in microgravity through SAME and SAME-R"},
+    "PSI-106": {"fuel_phase": "gas",    "roles": ["fundamental"], "hardware_family": "MSG with SPICE flow duct", "tags": ["flame liftoff", "ACME precursor"], "basis": "challenge: SLICE conducted in the MSG using the SPICE flow duct; factsheet: ACME precursor"},
+    "PSI-107": {"fuel_phase": "gas",    "roles": ["fundamental"], "hardware_family": "MSG with SPICE flow duct", "tags": ["soot", "smoke point"], "basis": "challenge: SPICE in the MSG; psi sub-area 'Fire Safety'"},
+    "PSI-60":  {"fuel_phase": "gas",    "roles": ["modeling"], "hardware_family": null, "tags": ["CFD", "SPICE re-analysis"], "basis": "psi: ground investigation re-analysing SPICE data"},
+    "PSI-62":  {"fuel_phase": "solid",  "roles": ["modeling", "prevention"], "hardware_family": null, "tags": ["flame spread modeling"], "basis": "psi: concurrent flame spread modeling in microgravity"},
+    "PSI-115": {"fuel_phase": "solid",  "roles": ["modeling", "detection"], "hardware_family": null, "tags": ["smoke modeling", "SAME re-analysis"], "basis": "psi: utilization of SAME data for advanced modeling"},
+    "PSI-117": {"fuel_phase": "liquid", "roles": ["modeling"], "hardware_family": null, "tags": ["CFD", "cool flames", "FLEX re-analysis"], "basis": "psi: CFD of droplet cool flames using FLEX flight data"},
+    "PSI-142": {"fuel_phase": "liquid", "roles": ["modeling"], "hardware_family": null, "tags": ["cool flames", "extinction", "FLEX re-analysis"], "basis": "psi: ground study using FLEX data on cool flame extinction"}
+  },
+  "scenarios": {
+    "_basis": "challenge statement, 'Spacesuits and oxygen concentration'",
+    "items": [
+      {"id": "earth", "label": "Earth sea level / ISS-like cabin", "o2_pct": 21, "pressure_kpa": 101.3, "basis": "Earth sea-level pressure 14.7 psi (challenge); ~21% O2 air"},
+      {"id": "moon_base", "label": "Moon Base & pressurized rover (expected)", "o2_pct_min": 30, "pressure_kpa_max": 70.3, "basis": "challenge: 'likely 30% or greater, with a corresponding pressure of 10.2 psi or less'"},
+      {"id": "spacesuit", "label": "Spacesuit", "o2_pct": 100, "pressure_kpa": 29.6, "basis": "challenge: '100% oxygen to only 4.3 psi'"}
+    ]
+  }
+}

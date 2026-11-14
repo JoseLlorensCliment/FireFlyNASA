@@ -1,0 +1,641 @@
+{
+ "accession": "PSI-98",
+ "acknowledgments": "",
+ "approach": "The Saffire-1 experiments was performed on the Orbital Science\u2019s Cygnus resupply vehicle after it deberthed from the ISS. The sample material for Saffire-I is a composite fabric called Sibal consisting of cotton on a fiberglass substrate (75% cotton, 25% fiberglass by weight). It has been used in many space experiments because it burns like cotton but maintains structural integrity after the cotton is consumed. The sample was approximately 0.94 meters long and 0.4 meters wide, simulating a large piece of flammable fabric. The Saffire-1 flight unit had a sample card installed in the middle of a large flow duct. Air is drawn through the flow duct by fans located at the top of the duct with flow straighteners at the bottom of the experiment module. Saffire-I was conducted at an air flow velocity of 20 cm/s. Once the sample was ignited flame images were captured using two cameras. In addition, thermocouples provided flow, flame, and plume temperatures, two radiometers recorded flame radiation, solid state sensors were used to measure pressure, CO2 and O2 mole faction, and two anemometer tracked flow velocity. All data was compressed, and subsequently downlinked.",
+ "assays": [],
+ "contacts": [
+  {
+   "@id": "",
+   "address": "",
+   "affiliation": "NASA GRC",
+   "comments": [],
+   "email": "david.urban@nasa.gov",
+   "fax": "",
+   "firstName": "David",
+   "lastName": "Urban",
+   "midInitials": "L.",
+   "phone": "",
+   "roles": [
+    {
+     "@id": "dEBvA2jSs25xM9IfCv5ploF8MUDFt0ACKekf97KJ",
+     "annotationValue": "Principal Investigator (PI)",
+     "comments": [],
+     "termAccession": "Principal Investigator (PI)",
+     "termSource": ""
+    }
+   ]
+  }
+ ],
+ "description": "",
+ "dirty": false,
+ "doi": "10.60555/0t15-1z43",
+ "experimentHardware": "Saffire 1 enclosure in Cygnus",
+ "experimentHardwareLink": "https://www1.grc.nasa.gov/space/iss-research/msg/saffire/",
+ "experimentalTable": [
+  {
+   "_id": {
+    "$oid": "6792c46eb7b6ff8e65037f3e"
+   },
+   "date_created": {
+    "$date": 1737671790269
+   },
+   "date_modified": {
+    "$date": 1737671790269
+   },
+   "file_name": "PSI-98_Experimental table_SAFFIRE-1.csv",
+   "file_size": 469,
+   "remote_path": "/Home/psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+   "resource_id": {
+    "$oid": "66cf53d46f1142c964b2e0a8"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+   "s3_version_id": "_eNG2ATl_BkM8A7pV_lFCVUo5ptKZk3G",
+   "study_id": {
+    "$oid": "683f4a58746db1c87dcebf3d"
+   },
+   "subcategory": "",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "experiments": [],
+ "factors": [],
+ "filesDisabled": null,
+ "flightProgram": "International Space Station (ISS)",
+ "funding": "NASA",
+ "hypothesis": "This investigation hypothesizes that due to large differences between fire behavior in normal and reduced gravity, the use of terrestrial fires and fire standards to design spacecraft fire safety systems presents an inherent risk to the vehicle because of the significant level of uncertainty. While this approach has been successful thus far, the uncertainty and risk will increase as exploration missions venture further from earth with considerably longer transit times for a safe return. There is a significant lack of microgravity data available for spacecraft designers on which to base their fire safety designs and procedures. To address this knowledge gap, this investigation proposed to conduct large-scale fire safety experiments in an expendable spacecraft without risk to a crew.",
+ "identifiers": [],
+ "images": [],
+ "investigationAcronym": "SAFFIRE-I",
+ "investigationEndDate": "02-28-2008",
+ "investigationStartDate": "03-02-2001",
+ "licenseIdentifier": "CC0-1.0",
+ "licenseLink": "https://spdx.org/licenses/CC0-1.0.html",
+ "licenseName": "Creative Commons Zero v1.0 Universal",
+ "managingNasaCenter": "Glenn Research Center (GRC)",
+ "missionEnd": "",
+ "missionLink": "",
+ "missionName": "",
+ "missionStart": "",
+ "modifiedDate": "03-Jun-2025",
+ "objective": "The objectives of this investigation were to:\n(1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA\u2019s normal\ngravity material flammability screening test.",
+ "organizations": [],
+ "payloads": [],
+ "projectIdentifier": "",
+ "projectLink": "",
+ "projectTitle": "",
+ "projectType": "Microgravity Investigation",
+ "proposalTitle": "Characterization of Smoke from Microgravity Fires for Improved Spacecraft Fire Detection",
+ "public": true,
+ "publications": [
+  {
+   "authorList": "W Schoren, GA Ruff, DL Urban",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "l87xqHQEQuC4rNfO31zRSVlRomoXfQjaWFyzxZZZ",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": ""
+   },
+   "title": "The Spacecraft Fire Experiment (Saffire) - Objectives, Development and Status"
+  },
+  {
+   "authorList": "JE Niehaus, PV Ferkul, SA Gokoglu, GA Ruff",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Buoyant Effects on the Flammability of Silicone Samples Planned for the Spacecraft Fire Experiment (Saffire)"
+  },
+  {
+   "authorList": "Urban David L., Ferkul Paul, Olson Sandra, Ruff Gary A., Easton John, T'ien James S., Liao Ya-Ting T., Li Chengyao, Fernandez-Pello Carlos, Torero Jose L., Legros Guillaume, Eigenbrod Christian, Smirnov Nickolay, Fujita Osamu, Rouvreau S\u00e9bastien, Toth Balazs, Jomaas Grunde",
+   "comments": [],
+   "doi": "10.1016/j.combustflame.2018.10.012",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Flame spread: Effects of microgravity and scale"
+  },
+  {
+   "authorList": "Li Chengyao, Liao Ya-Ting T., T'ien James S., Urban David L., Ferkul Paul, Olson Sandra, Ruff Gary A., Easton John",
+   "comments": [],
+   "doi": "10.1016/j.proci.2018.05.168",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Transient flame growth and spread processes over a large solid fabric in concurrent low-speed flows in microgravity \u2013 Model versus experiment"
+  },
+  {
+   "authorList": "Jomaas Grunde, Torero Jose L., Eigenbrod Christian, Niehaus Justin, Olson Sandra L., Ferkul Paul V., Legros Guillaume, Fernandez-Pello A. Carlos, Cowlard Adam J., Rouvreau Sebastien, Smirnov Nickolay, Fujita Osamu, T\u05f3ien James S., Ruff Gary A., Urban David L.",
+   "comments": [],
+   "doi": "10.1016/j.actaastro.2014.11.025",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Fire safety in space \u2013 beyond flammability testing of small samples"
+  },
+  {
+   "authorList": "Gary A. Ruff and David L. Urban.",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Operation and Development Status of the Spacecraft Fire Experiments (Saffire)"
+  }
+ ],
+ "related_glds": "PSI-99,PSI-100,PSI-26",
+ "releaseDate": "18-Sep-2024",
+ "researchArea": "Combustion Science",
+ "researchImpacts": "The Saffire-I experiment provides a new way to study a realistic fire on an exploration vehicle, which has not been possible in the past because the risks are too high. Instruments on an unmanned cargo vessel measure oxygen, carbon dioxide, heat, pressure and flame growth, and two video cameras provide views of the flame. Results determine microgravity flammability limits for several spacecraft materials, help to validate NASA\u2019s material selection criteria, and how microgravity and limited oxygen affect flame size. The investigation is crucial for the safety of current and future space missions. Studying fire in small, sealed environments such as the Cygnus cargo supply vehicle benefits fire safety and prevention efforts on Earth, including inside mines, airplanes, or submarines.",
+ "restricted": false,
+ "sourceAccession": "",
+ "sourceLink": "",
+ "spaceProgram": "National Aeronautics and Space Administration (NASA)",
+ "subResearchArea": "Spacecraft Fire, Smoke Distribution",
+ "submissionDate": "18-Sep-2024",
+ "title": "Spacecraft Fire Safety Experiment-I",
+ "totalFileSize": 12250600201.0,
+ "version": 4,
+ "versionMessage": "",
+ "versionMessageLevel": "",
+ "versionMessageLocations": [],
+ "versionReason": "Metadata update",
+ "files_latest_version": [
+  {
+   "file_name": "PSI-98_Engineering Documents_SAFFIRE Offgassing Testing Strategy.pdf",
+   "category": "Engineering Documents",
+   "file_size": 1696929.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-1_F1C1_DistortionGrids_1280x920_originals.zip",
+   "category": "Raw Data",
+   "file_size": 566718.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-I_ImageFrameSizes_ROI_Offsets_Grid_1280x920_v1.0.pdf",
+   "category": "Raw Data",
+   "file_size": 784299.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Mapped_SAFFIRE-1_F1C1_DistortionGrid_1280x920.zip",
+   "category": "Raw Data",
+   "file_size": 222794.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-1_F1C1_DistortionGrids_1360x1024_originals.zip",
+   "category": "Raw Data",
+   "file_size": 588576.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C1_jpegs.zip",
+   "category": "Raw Data",
+   "file_size": 59197949.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C1_JPEG_Mapped.zip",
+   "category": "Raw Data",
+   "file_size": 84789341.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_F1C1-Raw_DistroMaster_originals.zip",
+   "category": "Raw Data",
+   "file_size": 1822059.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C1_Raw2TIFF.zip",
+   "category": "Raw Data",
+   "file_size": 218871.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-I_Mapped_F1C1_Raw2TIFF.zip",
+   "category": "Raw Data",
+   "file_size": 277236.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-1_F1C2_DistortionGrid_1280x920.zip",
+   "category": "Raw Data",
+   "file_size": 556980.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Mapped_SAFFIRE-1_F1C2_DistortionGrid_1280x920.zip",
+   "category": "Raw Data",
+   "file_size": 215516.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-1_F1C2_DistortionGrids_1360x1024.zip",
+   "category": "Raw Data",
+   "file_size": 580912.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C2_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 47752221.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C2_JPEG_Mapped.zip",
+   "category": "Raw Data",
+   "file_size": 72041080.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C2-Raw_DistroMaster.zip",
+   "category": "Raw Data",
+   "file_size": 1808672.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F1C2_Raw2TIFF.zip",
+   "category": "Raw Data",
+   "file_size": 196227.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_Mapped_F1C2_Raw2TIFF.zip",
+   "category": "Raw Data",
+   "file_size": 263659.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F2C1_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 47530750.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE-I_F2C1_Mapped_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 69803205.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F2C2_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 40043615.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_F2C2_Mapped_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 63659574.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SFSDP-VIS-0295_Saffire 1 and 3_Thermocouple Placement.pdf",
+   "category": "Raw Data",
+   "file_size": 1065733.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Saffire-I Telemetry Data Good Process Version.xlsx",
+   "category": "Raw Data",
+   "file_size": 2775737.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Saffire-I Sample 1 Sensor Data Complete TM graphs.xlsx",
+   "category": "Raw Data",
+   "file_size": 25066841.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Saffire I Sample 1 TM graphs.docx",
+   "category": "Raw Data",
+   "file_size": 1412623.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Saffire-I Sample 2 TM graphs.docx",
+   "category": "Raw Data",
+   "file_size": 1016708.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_Saffire-I Sample 2 Sensor Data Complete TM graphs.xlsx",
+   "category": "Raw Data",
+   "file_size": 24892655.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Science Documents_SAFFIRE-I Image Directory Nomenclature.pdf",
+   "category": "Science Documents",
+   "file_size": 262860.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Science Documents_SAFFIRE-1_MergeResult-jpeg_Update_Final_v2.xlsx",
+   "category": "Science Documents",
+   "file_size": 12325177.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_Raw_DistroMaster.zip",
+   "category": "Raw Data",
+   "file_size": 301028742.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_Raw2TIFF_Complete.zip",
+   "category": "Raw Data",
+   "file_size": 19169825.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1Raw2TIFF_Complete_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 26095064.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_Raw2TIFF_Mapped_JPEGS.zip",
+   "category": "Raw Data",
+   "file_size": 25798148.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_IS1C2_Raw_DistroMaster.zip",
+   "category": "Raw Data",
+   "file_size": 210233376.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_Raw2TIFF_Complete.zip",
+   "category": "Raw Data",
+   "file_size": 14656724.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_RAW2TIFF_Complete_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 18767792.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_S1C2_RAW2TIFF_Mapped_JPEGS.zip",
+   "category": "Raw Data",
+   "file_size": 19557416.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 66317022.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_Raw_DistroMaster.zip",
+   "category": "Raw Data",
+   "file_size": 1449209.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_S2C1-1465938171811_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 179840.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_Raw2TIFF_Complete_JPEGS.zip",
+   "category": "Raw Data",
+   "file_size": 157672.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_Raw2TIFF_Mapped_JPEGS.zip",
+   "category": "Raw Data",
+   "file_size": 202946.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_Raw_DistroMaster.zip",
+   "category": "Raw Data",
+   "file_size": 37429293.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_Raw2TIFF_Complete_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 3116776.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_Raw2TIFF_Complete.zip",
+   "category": "Raw Data",
+   "file_size": 1293306.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_Raw2TIFF_Mapped.zip",
+   "category": "Raw Data",
+   "file_size": 1222959.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg_part3.zip",
+   "category": "Raw Data",
+   "file_size": 69819932.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg_part2.zip",
+   "category": "Raw Data",
+   "file_size": 83527817.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg_part1.zip",
+   "category": "Raw Data",
+   "file_size": 96361383.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_JPEG_Mapped_part1.zip",
+   "category": "Raw Data",
+   "file_size": 148690336.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_JPEG_Mapped_part2.zip",
+   "category": "Raw Data",
+   "file_size": 135089071.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_JPEG_Mapped_part3.zip",
+   "category": "Raw Data",
+   "file_size": 109190886.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg2png_icmad_part2.zip",
+   "category": "Raw Data",
+   "file_size": 1239632015.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg2png_icmad_part3.zip",
+   "category": "Raw Data",
+   "file_size": 1023095761.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C1_jpeg2png_icmad_part1.zip",
+   "category": "Raw Data",
+   "file_size": 1496417130.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg_part1.zip",
+   "category": "Raw Data",
+   "file_size": 79786765.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg_part2.zip",
+   "category": "Raw Data",
+   "file_size": 83633415.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg_part3.zip",
+   "category": "Raw Data",
+   "file_size": 75425271.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_JPEG_Mapped_part3.zip",
+   "category": "Raw Data",
+   "file_size": 134910758.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_JPEG_Mapped_part4.zip",
+   "category": "Raw Data",
+   "file_size": 121572185.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_JPEG_Mapped_Part1.zip",
+   "category": "Raw Data",
+   "file_size": 131787172.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_JPEG_Mapped_part2.zip",
+   "category": "Raw Data",
+   "file_size": 134910758.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg2png_icmad_part1.zip",
+   "category": "Raw Data",
+   "file_size": 1132279391.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg2png_icmad_part3.zip",
+   "category": "Raw Data",
+   "file_size": 1126949990.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S1C2_jpeg2png_icmad_part2.zip",
+   "category": "Raw Data",
+   "file_size": 1241540148.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_JPEG_Mapped.zip",
+   "category": "Raw Data",
+   "file_size": 105704956.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C1_jpeg2png_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 987695540.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 71794970.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_JPEG_Mapped.zip",
+   "category": "Raw Data",
+   "file_size": 119812900.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Raw Data_SAFFIRE_I_S2C2_jpeg2png_icmad.zip",
+   "category": "Raw Data",
+   "file_size": 990583882.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Science Documents_SAFFIRE Objectives, Development and Status.pdf",
+   "category": "Science Documents",
+   "file_size": 186259.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Science Documents_SAFFIRE-I and SAFFIRE-III Readme.docx",
+   "category": "Science Documents",
+   "file_size": 65426.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-98_Engineering Documents_SAFFIRE-I Operations.pdf",
+   "category": "Engineering Documents",
+   "file_size": 13957.0,
+   "version": 1
+  }
+ ]
+}

@@ -1,0 +1,468 @@
+# RAG_HANDOFF — Traspaso de la construcción del RAG a otro ordenador
+
+> **Proyecto:** Flame Intelligence (NASA Space Apps 2026 · *Flame in Freefall*)
+> **Fecha del traspaso:** 14 nov 2026
+> **Motivo:** el equipo actual (AMD Athlon antiguo, 8 GB de RAM) no es adecuado para el procesamiento pesado. La
+> extracción del corpus, los embeddings y el índice FAISS se harán en otro ordenador usando la **API de Gemini**.
+> **Para la IA que continúe:** aquí está todo lo que se ha hecho, verificado y decidido. Lo que **no** está verificado
+> aparece marcado como ⚠️ *no probado*. No hace falta volver a investigar nada de lo que figura en este documento.
+
+---
+
+## 0. Resumen en 10 líneas
+
+1. **No existe todavía ningún índice RAG ni corpus parcial.** `data/processed/rag/` no existe: el único intento de
+   construirlo (embeddings locales en CPU) se interrumpió dos veces antes de escribir nada en disco.
+2. Los **documentos NASA originales ya están descargados**: 79 PDF (185,8 MB), con checksums en
+   `data/metadata/psi_documents_inventory.csv`.
+3. **El código del RAG está terminado y probado con tests** (23 tests, sin red): extracción, chunking, embeddings con
+   Gemini, FAISS, recuperación, generación con citas y validación.
+4. La construcción tiene **3 etapas reanudables**: `chunks → embed → index`. La etapa `embed` guarda un punto de control
+   por lote y se puede interrumpir y relanzar.
+5. Modelo generativo: **`gemini-3.8-flash`** (verificado en la documentación oficial; estable).
+6. Modelo de embeddings: **`gemini-embedding-001`** a **768 dimensiones** (recomendación). Alternativa:
+   `gemini-embedding-2`.
+7. Única variable secreta: **`GEMINI_API_KEY`**, en `.env`. No hay ninguna clave en el repositorio.
+8. Se han verificado las dependencias para Windows: la resolución con `uv` para `win_amd64` / Python 3.12 funciona.
+   `faiss-cpu` tiene wheel para Windows.
+9. **Pendiente en el otro ordenador:** obtener los PDF → `build_dataset` → `chunks` → `embed` → `index` →
+   `rag_smoke_test`.
+10. ⚠️ **No probado con la API real:** ninguna llamada a Gemini se ha ejecutado de verdad (no había clave en este
+    equipo). El código usa campos y métodos que existen en el SDK `google-genai==2.34.0` (inspeccionado) y se ha probado
+    con un cliente simulado.
+
+---
+
+## 1. Estado actual del RAG
+
+| Elemento | Estado | Ubicación |
+|---|---|---|
+| Metadatos PSI (24 investigaciones) | ✅ Descargados y en git | `data/raw/psi/investigations/*.json`, `data/raw/psi/combustion_investigations_search.json` |
+| Tablas experimentales PSI (22 CSV) | ✅ Descargadas y en git | `data/raw/psi/experimental_tables/` |
+| Base SQLite normalizada | ✅ Se regenera en segundos (no va en git) | `data/processed/flame.db` ← `pipeline/build_dataset.py` |
+| PDF del PSI (70 ficheros, ~175 MB) | ✅ Descargados en ESTE equipo, **fuera de git** | `data/raw/psi/documents/PSI-*/` |
+| PDF de NASA GRC y guía ISS (9 ficheros, 3,2 MB) | ✅ Descargados y en git | `data/raw/nasa_docs/` |
+| Inventario con SHA-256 de los 79 PDF | ✅ Creado y en git | `data/metadata/psi_documents_inventory.csv` |
+| Texto extraído / chunks (`chunks.jsonl`) | ❌ **No generado** | (se creará en `data/processed/rag/`) |
+| Embeddings | ❌ **No generados** (ni locales ni de Google) | (se crearán en `data/processed/rag/embed_cache/`) |
+| Índice FAISS | ❌ **No existe** | (se creará en `data/processed/rag/index.faiss`) |
+| Código de construcción (3 etapas) | ✅ Escrito y probado con tests simulados | `pipeline/build_rag_index.py` |
+| Código de servicio (retriever, LLM, citas) | ✅ Escrito y probado con tests simulados | `backend/app/ai/` |
+| Script de validación | ✅ Escrito y probado con un índice simulado | `pipeline/rag_smoke_test.py` |
+| Llamadas reales a Gemini | ⚠️ **No probadas** (no había clave) | — |
+
+**Qué no hay que repetir:** la descarga de metadatos y CSV, la normalización (el código), el diseño de chunking y
+citas, la investigación de los modelos de Gemini, ni la fijación de versiones de las dependencias.
+
+---
+
+## 2. Arquitectura del RAG
+
+```
+                OFFLINE (otro ordenador, una sola vez)                                ONLINE (API FastAPI)
+┌───────────────────────────────────────────────────────────────────┐   ┌────────────────────────────────────────────┐
+│ data/raw/psi/documents/*.pdf ─┐                                   │   │ POST /api/assistant/ask {question}         │
+│ data/raw/nasa_docs/*.pdf ─────┼─ PyMuPDF ─ limpieza ─ chunking ─┐ │   │   │                                        │
+│ data/processed/flame.db ──────┘  (registros PSI + resúmenes     │ │   │   ├─ embed_query (Gemini embeddings)       │
+│                                   deterministas de tablas)      │ │   │   ├─ FAISS top-k + reglas de diversidad    │
+│                       [etapa chunks] → rag/chunks.jsonl ◄───────┘ │   │   ├─ prompt con fuentes [S1..Sk]           │
+│                       [etapa embed]  → rag/embed_cache/…/*.npy    │   │   ├─ gemini-3.8-flash → JSON               │
+│                          (Gemini embeddings, por lotes, reanudable)│  │   └─ validación de citas → respuesta      │
+│                       [etapa index]  → rag/index.faiss            │   │        + fuentes (PDF#page / PSI URL)     │
+│                                       rag/manifest.json           │   └────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────┘
+```
+
+**Cambios de arquitectura respecto al prototipo anterior** (mínimos, ya aplicados):
+
+1. **Proveedor de embeddings configurable** (`EMBEDDING_PROVIDER=google|local`). Antes solo había fastembed local.
+2. **Proveedor del LLM configurable** (`LLM_PROVIDER=gemini|groq`). Gemini pasa a ser el predeterminado y Groq queda
+   como opción heredada.
+3. **Construcción por etapas reanudables.** Antes era un único paso en memoria, y por eso se perdía todo al
+   interrumpirse.
+4. **El `manifest.json` registra el modelo y la dimensión de los embeddings.** La API **se niega** a usar un índice
+   construido con otra configuración: los vectores de consulta y de documento deben estar en el mismo espacio.
+5. **Lectura y escritura en UTF-8 explícita y rutas POSIX en los metadatos**, para que funcione igual en Windows.
+
+---
+
+## 3. Estructura de carpetas relevante
+
+```
+flame-intelligence/
+├── .env.example                      plantilla de configuración (copiar a .env)
+├── RAG_HANDOFF.md                    este documento
+├── backend/
+│   ├── requirements.txt              dependencias Python fijadas
+│   ├── app/core/config.py            todas las variables de entorno y sus valores por defecto
+│   ├── app/ai/embeddings.py          embeddings Google / local + normalización + reintentos
+│   ├── app/ai/retriever.py           carga de FAISS, comprobación del manifest, búsqueda
+│   ├── app/ai/llm.py                 adaptador Gemini (y Groq)
+│   ├── app/ai/assistant.py           prompt, ensamblado de fuentes y validación de citas
+│   ├── app/api/assistant.py          endpoints /api/assistant/* y /api/documents/{chunk_id}
+│   └── tests/                        23 tests (test_rag_pipeline.py cubre el RAG)
+├── pipeline/
+│   ├── fetch_psi.py                  descarga desde el PSI (metadatos, CSV, PDF con --docs)
+│   ├── parsing.py, build_dataset.py  normalización → data/processed/flame.db
+│   ├── build_rag_index.py            RAG: etapas chunks / embed / index
+│   └── rag_smoke_test.py             validación del índice y de una respuesta con citas
+└── data/
+    ├── raw/psi/{investigations,experimental_tables}/   en git
+    ├── raw/psi/documents/PSI-*/*.pdf                    NO en git (~175 MB)
+    ├── raw/nasa_docs/*.pdf                              en git (3,2 MB)
+    ├── metadata/curation.json                           clasificación curada
+    ├── metadata/psi_documents_inventory.csv             inventario y SHA-256 de los 79 PDF
+    └── processed/                                       se genera; NO en git (flame.db, rag/, models/)
+```
+
+---
+
+## 4. Inventario de documentos y fuentes NASA
+
+El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
+`data/metadata/psi_documents_inventory.csv`.
+
+| Fuente | Qué es | Nº | Tamaño | Licencia | ¿En git? | ¿Se indexa? |
+|---|---|---|---|---|---|---|
+| NASA PSI, https://psi.nasa.gov/physci/repo (API `geode-py/ws`) | *Reports*, *Science Documents* y *Presentations* en PDF (<25 MB cada uno) de 14 investigaciones de combustión | 70 | ~175 MB | CC0-1.0 | No | 62 sí, 8 no (filtro) |
+| nasa.gov (NASA GRC) | Fichas de experimentos: ACME, BASS, DAFT, FLEX, SAME, SPICE, Saffire, SLICE | 8 | ~1,7 MB | NASA, dominio público | Sí | Sí |
+| nasa.gov | *A Researcher's Guide to: Combustion Science* (ISS, 2015), 56 páginas | 1 | 1,5 MB | NASA, dominio público | Sí | Sí |
+| `data/processed/flame.db` (derivado de los CSV y JSON del PSI) | 101 chunks de registros PSI (objetivos, enfoque, hipótesis, impacto) y 50 de resúmenes y filas de tablas | — | — | CC0-1.0 | Se regenera | Sí (151 chunks, contados) |
+
+- **Filtro de exclusión** (`SKIP_DOCS` en `build_rag_index.py`): *crew training*, *image directory nomenclature*,
+  *researchers guide* (duplicado de la copia de nasa.gov) y *pubslist*.
+- **Volumen que hay que indexar:** 71 PDF con **2 323 páginas** (contadas con `pdfinfo`) más 151 chunks de la base de
+  datos. El número final de chunks **no se conoce todavía**: se sabrá al ejecutar la etapa `chunks`.
+- **Las URL de cita** de cada documento PSI apuntan a la página de su investigación
+  (`https://psi.nasa.gov/physci/repo/data/investigations/PSI-n`); las de los documentos de nasa.gov, al PDF original.
+  Además, la API sirve la copia local en `/api/documents/{chunk_id}#page=N`.
+
+### Cómo obtener los PDF del PSI en el otro ordenador (no están en git)
+
+- **Opción A (recomendada si hay un medio de copia):** comprimir `data/raw/psi/documents/` en este equipo, copiarlo a la
+  misma ruta del repositorio en el otro y verificar los hashes (ver el §8, paso 4).
+- **Opción B:** volver a descargarlos con `python pipeline/fetch_psi.py --docs`. El script es idempotente y se salta lo
+  que ya existe. El servidor del PSI es **muy lento**: entre 1 y 300 s por ficha y a veces corta respuestas grandes.
+  Puede tardar entre 30 y 90 minutos. Las URL de descarga son URL prefirmadas de S3 que el script obtiene él mismo.
+
+---
+
+## 5. Scripts disponibles
+
+| Script | Función | Pesado | Estado |
+|---|---|---|---|
+| `pipeline/fetch_psi.py [--docs] [--force]` | Descarga metadatos, CSV y (con `--docs`) los PDF del PSI | Red (lento) | ✅ Usado en este equipo |
+| `pipeline/build_dataset.py` | CSV y JSON → `data/processed/flame.db` | No (segundos) | ✅ Usado |
+| `pipeline/build_rag_index.py --stage chunks` | Extracción de texto (PyMuPDF), limpieza y chunking → `chunks.jsonl` | CPU medio (~2 300 páginas) | ✅ Probado con tests (sin PDF); ⚠️ no ejecutado con todo el corpus |
+| `pipeline/build_rag_index.py --stage embed` | Embeddings por lotes con reintentos y puntos de control | Red / API | ✅ Probado con cliente simulado; ⚠️ no con la API real |
+| `pipeline/build_rag_index.py --stage index` | Vectores → FAISS `IndexFlatIP` y `manifest.json` | No | ✅ Probado con tests |
+| `pipeline/build_rag_index.py --limit N --out <dir>` | Construcción mínima de prueba (los N primeros chunks) | Muy ligero | ✅ Probado con tests |
+| `pipeline/rag_smoke_test.py [--answer]` | Valida el índice, la recuperación y una respuesta con citas | Ligero (1 llamada LLM) | ✅ Probado con un índice simulado (sin `--answer`) |
+| `python -m pytest -q backend/tests` | 23 tests unitarios y de API, sin red | Ligero | ✅ 23/23 pasan |
+
+**Detalle de la limpieza y el chunking** (`clean`, `split`, `pdf_chunks`):
+- Se quitan los guiones suaves, se sustituyen las ligaduras (ﬁ → fi, ﬂ → fl), se unen las palabras partidas con guion
+  al final de línea, se compactan los espacios y se limitan los saltos de línea a dos.
+- Se trabaja página a página. Se descartan las páginas con menos de 200 caracteres (portadas, figuras).
+- Las ventanas son de **1 400 caracteres** con **250 de solape**, y se corta preferentemente en un fin de frase o de
+  línea situado en la segunda mitad de la ventana.
+- Se descartan los fragmentos de menos de 80 caracteres.
+
+---
+
+## 6. Dependencias
+
+- **Python 3.12** (usado aquí). `google-genai` exige Python ≥3.11.
+- `backend/requirements.txt` (fijado). Las piezas del RAG son:
+
+| Paquete | Versión | Uso |
+|---|---|---|
+| `google-genai` | **2.34.0** (29 oct 2026) | Gemini: generación y embeddings |
+| `pydantic` | **2.14.1** | `google-genai` 2.34.0 exige ≥2.12.5. Corregido: antes estaba en 2.10.2, que era incompatible |
+| `faiss-cpu` | 1.9.0.post1 | Índice vectorial (tiene wheel `win_amd64`) |
+| `pymupdf` | 1.24.14 | Extracción de texto de los PDF |
+| `numpy` | 2.1.3 | Vectores |
+| `fastembed` | 0.4.2 | Solo si `EMBEDDING_PROVIDER=local` (opcional) |
+| `groq` | 0.13.0 | Solo si `LLM_PROVIDER=groq` (opción heredada) |
+
+- Comprobado en este equipo: `uv pip check` dice «All installed packages are compatible», y
+  `uv pip compile --python-platform windows --python-version 3.12` resuelve 69 paquetes sin conflictos.
+- Frontend (no hace falta para construir el RAG): Node 20 o superior (aquí 22.11.0); `npm install` en `frontend/`.
+
+---
+
+## 7. Configuración de Gemini
+
+### 7.1 Modelos (verificados en la documentación oficial el 14 nov 2026)
+
+Fuentes: https://aistudio.google.com/docs/models, `/docs/models/gemini-3.8-flash`, `/docs/embeddings`,
+`/docs/models/gemini-embedding-001` y `/docs/models/gemini-embedding-2`.
+
+| Rol | Identificador exacto | Datos verificados |
+|---|---|---|
+| **Generación (LLM)** | `gemini-3.8-flash` | Estable. Entrada: texto, imagen, vídeo, audio y PDF. Salida: texto. Contexto de 1 048 576 tokens y 65 536 de salida. Admite *structured outputs*. *Thinking* `low`/`medium`/`high` (por defecto `medium`; `minimal` devuelve error). Actualizado en septiembre de 2026. La lista de modelos lo llama *previous-generation Flash* porque ya existe la familia Gemini 4 (`gemini-4-hydrogen`, `gemini-4-argon`, `gemini-4-carbon`). |
+| **Embeddings (recomendado)** | `gemini-embedding-001` | Estable. Solo texto. Entrada máxima de **2 048 tokens**. Dimensión configurable de 128 a 3072 (se recomiendan 768, 1536 o 3072; por defecto 3072). Admite `task_type` (`RETRIEVAL_DOCUMENT`, `RETRIEVAL_QUERY`, `QUESTION_ANSWERING`…). Una lista de textos devuelve un embedding por texto. **Solo viene normalizado a 3072 dimensiones**: con menos hay que normalizar a mano (el código ya lo hace). |
+| Embeddings (alternativa) | `gemini-embedding-2` | Estable (abril de 2026). Multimodal. Entrada máxima de **8 192 tokens**. Sin campo `task_type`: la tarea va en el texto (`task: question answering \| query: …` y `title: … \| text: …`). Varias entradas en un solo `contents` producen **un único embedding agregado**: hay que envolver cada texto en su propio `types.Content` para obtener uno por texto (el código ya lo hace). Normaliza solo en dimensiones reducidas. |
+
+> **No confundir:** `gemini-3.8-flash` **no genera embeddings**. Los vectores los produce **un modelo de
+> embeddings** (`gemini-embedding-001` o `-2`). Ese mismo modelo y la misma dimensión deben usarse para indexar y para
+> las consultas.
+
+**Por qué se recomienda `gemini-embedding-001`:** el corpus es solo texto; sus chunks (unos 1 400 caracteres más el
+título, muy por debajo de 2 048 tokens) caben sin problema; admite `task_type` nativo y el envío por lotes de varias
+cadenas está documentado. `gemini-embedding-2` es más reciente y está soportado en el código, pero exige el formato de
+prompt descrito arriba. Si se usa, hay que reconstruir el índice entero y no mezclarlo.
+
+**Dimensión recomendada: 768.** Según la tabla MTEB de la documentación, 768 da 67,99 frente a 68,17 con 1536, y ocupa
+4 veces menos que 3072.
+
+### 7.2 Variables de entorno (en `.env`, nunca en el código)
+
+| Variable | Valor recomendado | Notas |
+|---|---|---|
+| `GEMINI_API_KEY` | *(tu clave)* | **Única variable secreta.** La lee `app/core/config.py` desde `.env` o desde el entorno. Se crea en https://aistudio.google.com/apikey |
+| `LLM_PROVIDER` | `gemini` | `groq` sigue siendo posible |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | |
+| `GEMINI_THINKING_LEVEL` | *(vacío)* | Vacío = predeterminado del modelo (`medium`). `low` reduce latencia y coste |
+| `EMBEDDING_PROVIDER` | `google` | `local` = fastembed en CPU (384 dimensiones) |
+| `EMBEDDING_MODEL` | `gemini-embedding-001` | o `gemini-embedding-2` |
+| `EMBEDDING_DIM` | `768` | **Debe ser idéntica al construir el índice y al servir consultas** |
+| `EMBED_BATCH_SIZE` | `50` | ⚠️ El máximo de textos por petición **no se ha verificado** en la documentación. Si la API rechaza el lote, bajarlo (p. ej. a 20). Al cambiarlo se usa otra carpeta de caché |
+| `EMBED_MAX_RETRIES` | `8` | Reintentos con espera exponencial ante 429, 500, 502, 503, 504 o RESOURCE_EXHAUSTED |
+
+### 7.3 Cómo se llama a la API en el código
+
+- **Embeddings** (`backend/app/ai/embeddings.py`):
+  `client.models.embed_content(model=EMBEDDING_MODEL, contents=..., config=types.EmbedContentConfig(task_type=..., output_dimensionality=EMBEDDING_DIM))`.
+  - Documentos con `RETRIEVAL_DOCUMENT`; consultas con `QUESTION_ANSWERING` (documentado para preguntas frente a
+    documentos `RETRIEVAL_DOCUMENT`).
+  - Todo vector se **normaliza (L2)** antes de entrar en FAISS: el producto interno equivale así al coseno.
+- **Generación** (`backend/app/ai/llm.py`):
+  `client.models.generate_content(model="gemini-3.8-flash", contents=user, config=types.GenerateContentConfig(system_instruction=..., response_mime_type="application/json", max_output_tokens=8192[, thinking_config=ThinkingConfig(thinking_level=...)]))`
+  y después se lee `resp.text`.
+  - ⚠️ La documentación actual de Google muestra la **Interactions API** (`client.interactions.create(...)`,
+    `interaction.output_text`). El SDK 2.34.0 incluye **ambas**; se eligió `models.generate_content` porque sus campos
+    (`system_instruction`, `response_mime_type`, `thinking_config.thinking_level`) se comprobaron en el código del SDK.
+  - Si `generate_content` fallara con este modelo, se puede cambiar a
+    `client.interactions.create(model=..., system_instruction=..., input=user, generation_config={"max_output_tokens": ..., "thinking_level": ...})`.
+    Los nombres de esos campos existen en `google/genai/_gaos/types/interactions/` del SDK 2.34.0.
+- **Límites y coste:** dependen del *tier* del proyecto en AI Studio; consultar https://aistudio.google.com/docs/rate-limits
+  y la propia consola. Con unos 3 000–6 000 chunks estimados (ver §9) y lotes de 50, son unas 60–120 peticiones de
+  embeddings. La caché por lotes permite parar y continuar si se agota la cuota.
+
+---
+
+## 8. Reconstrucción paso a paso (Windows PowerShell)
+
+> Todos los comandos se ejecutan **desde la raíz del repositorio**. Se usa `.\.venv\Scripts\python.exe` directamente,
+> así que no hace falta activar el entorno virtual ni cambiar la política de ejecución de PowerShell.
+> En Linux o macOS, cambiar `.\.venv\Scripts\python.exe` por `.venv/bin/python` y `\` por `/`.
+
+**1. Clonar el repositorio**
+```powershell
+git clone <URL-DEL-REPOSITORIO> flame-intelligence
+cd flame-intelligence
+```
+
+**2. Instalar las dependencias** (Python 3.12)
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
+
+**3. Configurar las variables de entorno**
+```powershell
+Copy-Item .env.example .env
+notepad .env        # rellenar GEMINI_API_KEY=...  (no subir .env a git; está en .gitignore)
+```
+Comprobar que se lee la configuración (no imprime la clave):
+```powershell
+.\.venv\Scripts\python.exe -c "import sys; sys.path.insert(0,'backend'); from app.core.config import get_settings as g; s=g(); print(s.llm_provider, s.gemini_model, s.embedding_provider, s.embedding_model, s.embedding_dim, 'key set:', bool(s.gemini_api_key))"
+```
+
+**4. Localizar los documentos originales**
+```powershell
+# Opción A: copiar la carpeta data\raw\psi\documents desde el equipo antiguo (zip, USB…), y después:
+# Opción B: volver a descargarla (lento):
+.\.venv\Scripts\python.exe pipeline\fetch_psi.py --docs
+```
+Verificar que están todos y sin alterar (79 filas; no debe imprimir nada):
+```powershell
+Import-Csv data\metadata\psi_documents_inventory.csv | ForEach-Object {
+  if (-not (Test-Path $_.path)) { "MISSING  $($_.path)" }
+  elseif ((Get-FileHash $_.path -Algorithm SHA256).Hash.ToLower() -ne $_.sha256) { "MISMATCH $($_.path)" }
+}
+```
+> Si se usa la opción B, el PSI podría servir versiones más recientes de algún PDF (hash distinto). No es un error, pero
+> conviene anotarlo.
+
+**5. Generar la base de datos normalizada** (segundos)
+```powershell
+.\.venv\Scripts\python.exe pipeline\build_dataset.py
+.\.venv\Scripts\python.exe -m pytest -q backend\tests      # deben pasar los 23 tests
+```
+
+**6. Extraer, limpiar y dividir en chunks**
+```powershell
+.\.venv\Scripts\python.exe pipeline\build_rag_index.py --stage chunks
+```
+Resultado: `data\processed\rag\chunks.jsonl`. Anotar el número de chunks que se imprime.
+
+**7a. Prueba mínima contra la API** (recomendada antes del lote completo: unos 20 embeddings)
+```powershell
+.\.venv\Scripts\python.exe pipeline\build_rag_index.py --limit 20 --out data/processed/rag_smoke
+Remove-Item -Recurse -Force data\processed\rag_smoke       # borrar la prueba después
+```
+
+**7b. Generar los embeddings con la API de Google** (reanudable: si se corta o se agota la cuota, repetir el mismo comando)
+```powershell
+.\.venv\Scripts\python.exe pipeline\build_rag_index.py --stage embed
+```
+
+**8. Construir el índice FAISS**
+```powershell
+.\.venv\Scripts\python.exe pipeline\build_rag_index.py --stage index
+```
+Resultado: `data\processed\rag\index.faiss` y `manifest.json` (con el modelo y la dimensión usados).
+
+**9. Comprobar que el índice funciona** (integridad, PDF presentes y 4 consultas con fuentes esperadas)
+```powershell
+.\.venv\Scripts\python.exe pipeline\rag_smoke_test.py
+```
+
+**10. Consulta de prueba con respuesta y referencias** (1 llamada a `gemini-3.8-flash`)
+```powershell
+.\.venv\Scripts\python.exe pipeline\rag_smoke_test.py --answer
+```
+El resultado debe terminar en `RESULT: PASS` y listar las fuentes citadas (`S#`: título, página y URL de PSI o NASA).
+
+**11. (Opcional) Probar la aplicación completa**
+```powershell
+cd backend; ..\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000      # terminal 1
+cd frontend; npm install; npm run dev                                            # terminal 2 → http://localhost:5173/assistant
+```
+
+---
+
+## 9. Parámetros del RAG: existentes y recomendados
+
+| Parámetro | **Configuración existente (en el código)** | Recomendación | Dónde |
+|---|---|---|---|
+| Modelo de embeddings | `gemini-embedding-001` (predeterminado). Antes: `BAAI/bge-small-en-v1.5` local, nunca llegó a completarse | Mantener `gemini-embedding-001` | `.env` / `config.py` |
+| Modelo generativo | `gemini-3.8-flash` | Mantener; `GEMINI_THINKING_LEVEL=low` si la latencia importa | `.env` |
+| Dimensión | `768` (Google); 384 si es local | 768 | `EMBEDDING_DIM` |
+| Normalización | L2 siempre, en el cliente | — | `embeddings.py` |
+| Tamaño del chunk | **1 400 caracteres** | Mantener (muy por debajo de 2 048 tokens) | `CHUNK_CHARS` |
+| Solapamiento | **250 caracteres** | Mantener | `OVERLAP` |
+| Mínimo por página | 200 caracteres | — | `MIN_PAGE_CHARS` |
+| Texto que se embebe | `"{title}\n{text}"` (001) · `"title: {title} \| text: {text}"` (embedding-2) | — | `embeddings._format_document` |
+| Tipo de índice | FAISS `IndexFlatIP` (exacto, coseno) | Suficiente para menos de 100 000 vectores | `stage_index` |
+| Recuperación | Top 400 candidatos → filtro por ámbito opcional → **cobertura garantizada** de cada investigación mencionada en la pregunta (p. ej. «FLEX vs BASS») → **máximo 3 chunks por documento** | — | `retriever.search` |
+| Resultados que se recuperan (k) | **8** por defecto (la API admite de 3 a 14) | 8 | `AskRequest.k` |
+| Validación de la respuesta | Se eliminan y se avisan las citas `[S#]` inexistentes; se marca la respuesta sin citas válidas | — | `assistant.py` |
+| Nº total de chunks | **Desconocido** (151 de la base de datos, contados, más los de 2 323 páginas de PDF) | Estimación sin verificar: unos 3 000–6 000 | se sabrá en el paso 6 |
+
+**Metadatos de cada chunk** (`chunks.jsonl`), necesarios para citar:
+
+| Campo | Ejemplo | Uso |
+|---|---|---|
+| `id` | `1532` | Posición en FAISS = línea en `chunks.jsonl` (deben coincidir) |
+| `doc_id` | `psi:PSI-26/PSI-26_Presentations_...pdf` · `PSI-69:record` · `PSI-69:table` · `nasa:flame-extinguishment-experiment-flex.pdf` | Agrupar y diversificar por documento |
+| `title` | `BASS: Presentations — BASS Overview of Recent ISS Results` | Título mostrado en la cita |
+| `accession` | `PSI-26` | Enlace a la investigación y filtros de ámbito |
+| `source_type` | `psi_record` · `psi_table` · `psi_document` · `nasa_doc` | Tipo de fuente en la UI |
+| `page` | `4` (o `null` en registros y tablas) | Cita con página y apertura del PDF en `#page=N` |
+| `url` | Página del PSI o PDF de nasa.gov | Enlace verificable |
+| `local_path` | `data/raw/psi/documents/PSI-26/...pdf` (POSIX, relativo) | Servir el PDF local |
+| `text` | — | Contenido que se envía al LLM |
+
+---
+
+## 10. Pruebas de validación
+
+1. `python -m pytest -q backend/tests` → **23 passed** (comprobado aquí). Incluye:
+   - el formato de las peticiones a `gemini-embedding-001` y `-2`;
+   - la normalización;
+   - los reintentos ante 429;
+   - la reanudación de `embed` tras un corte;
+   - el `manifest` con la firma del modelo;
+   - el rechazo de un índice construido con otra dimensión;
+   - el borrado de citas inventadas;
+   - el modo de solo recuperación sin LLM.
+2. `rag_smoke_test.py` → integridad (vectores = chunks, firma de embeddings = `.env`, PDF presentes) y recuperación con 4
+   casos cuyas investigaciones esperadas se conocen por el catálogo PSI:
+   - supresión en FLEX → PSI-69/68;
+   - SIBAL en Saffire → PSI-98/99/100;
+   - humo y detección → PSI-101/102/115;
+   - llamas inversas con O₂ al 85 % → PSI-159/10.
+3. `rag_smoke_test.py --answer` → la respuesta tiene citas `[S#]` que existen en las fuentes devueltas, y cada fuente
+   citada tiene título y enlace.
+4. Revisión manual recomendada: hacer en `/assistant` las 5 preguntas de ejemplo y abrir 2 o 3 citas para comprobar que
+   el PDF y la página contienen lo que se afirma.
+
+---
+
+## 11. Problemas conocidos e incidencias
+
+| # | Problema | Estado |
+|---|---|---|
+| 1 | La construcción con embeddings locales en CPU (fastembed) **se interrumpió dos veces** al cerrarse la sesión. No dejó ningún fichero porque el script antiguo lo hacía todo en memoria | Resuelto en el diseño: etapas reanudables con puntos de control. **Motivo del traslado** |
+| 2 | El servidor del PSI es lento (1–300 s por petición) y corta respuestas JSON grandes (fichas de ACME) | Mitigado: tiempos de espera largos y reintentos en `fetch_psi.py`. Las 24 fichas se descargaron completas |
+| 3 | `google-genai` 2.34.0 exige `pydantic>=2.12.5` (el requirements tenía 2.10.2) | Corregido: `pydantic==2.14.1`, `httpx==0.28.1` |
+| 4 | Riesgo en Windows: lectura y escritura sin `encoding` (cp1252 por defecto) y rutas con `\` en los metadatos | Corregido: UTF-8 explícito y `as_posix()` |
+| 5 | En este equipo falta `ensurepip` (no hay `pip` en el venv del sistema) | Se usó `uv`. En el otro equipo, `py -m venv` funciona normalmente |
+| 6 | La compilación del frontend (`vite build`) es pesada en este equipo y una ejecución se interrumpió | `tsc` verificado sin errores; el build no se ha repetido aquí |
+| 7 | ⚠️ No se ha hecho ninguna llamada real a Gemini (no había clave) | Pendiente: pasos 7a, 9 y 10 |
+| 8 | ⚠️ Máximo de textos por petición de `embed_content` no verificado | `EMBED_BATCH_SIZE` es configurable; bajarlo si la API lo rechaza |
+| 9 | Con `EMBEDDING_PROVIDER=google`, la **recuperación** también necesita la clave (se embebe la consulta). Sin clave, el asistente devuelve un error 503 claro | Por diseño |
+| 10 | El documento `PSI-23_Presentations_ISS Researchers Guide - Combustion In Reduced Gravity.pdf` es otra copia de la guía de nasa.gov | Excluido para no duplicar |
+
+---
+
+## 12. Tareas pendientes, en orden recomendado
+
+1. **Subir a GitHub desde este equipo** (no hay repositorio git todavía):
+   ```bash
+   git init && git add . && git status     # revisar: no deben aparecer .env, data/raw/psi/documents, data/processed
+   git commit -m "Flame Intelligence: data pipeline, app, RAG code and handoff"
+   git remote add origin <URL> && git push -u origin main
+   ```
+2. Trasladar `data/raw/psi/documents/` al otro equipo (opción A del §4), o volver a descargarlo allí (opción B).
+3. En el otro equipo: §8, pasos 1 a 5.
+4. Paso 6 (`chunks`). Anotar el número de chunks en este documento (§9).
+5. Paso 7a (prueba con 20 chunks) para validar la clave, el modelo, el tamaño de lote y la cuota.
+6. Pasos 7b y 8 (embeddings completos y FAISS).
+7. Pasos 9 y 10 (validación). Si `--answer` falla en la llamada de generación, ver el §7.3 (alternativa con la
+   Interactions API).
+8. Revisión manual de citas (§10, punto 4) y actualización de este documento con los resultados reales.
+9. **Decidir cómo se distribuye el índice:** no va en git (`data/processed/rag/` está en `.gitignore`). Para desplegar la
+   demo hay que, o bien reconstruirlo en el servidor (requiere los PDF y la clave), o bien copiar `chunks.jsonl`,
+   `index.faiss` y `manifest.json` (unos 10–20 MB estimados con 768 dimensiones). Si se decide compartirlo, quitar
+   esas líneas de `.gitignore` de forma consciente.
+10. Mantener `GEMINI_API_KEY` solo en `.env` o en las variables del sistema o del servidor de despliegue; nunca en el
+    código ni en el repositorio.
+
+---
+
+## 13. Preparación para GitHub (comprobado)
+
+- Simulación de `git add` con un repositorio temporal: **119 ficheros, 6,9 MB**, sin `.env`, PDF del PSI, base de datos, índices ni modelos; sin patrones de clave de Google o Groq en el código.
+- `.gitignore` excluye:
+  - `.env` y `.env.*` (salvo `.env.example`), `*.key` y `credentials*.json`;
+  - `.venv/`, `node_modules/` y `frontend/dist/`;
+  - `data/raw/psi/documents/` (175 MB);
+  - `data/processed/flame.db`, `data/processed/rag/`, `rag_*/`, `*.faiss`, `*.npy` y `data/processed/models/`;
+  - `.claude/`, configuración de editores y logs.
+- **Lo que sí se sube:**
+  - todo el código y los tests;
+  - `.env.example`;
+  - los datos PSI pequeños: metadatos, 22 CSV, ~3 MB;
+  - los 9 PDF de nasa.gov (3,2 MB);
+  - `curation.json` y el inventario con hashes.
+- **No hay claves en el repositorio.** El código las lee de `GEMINI_API_KEY` y `GROQ_API_KEY` con
+  `pydantic-settings`. Comprobado: no existe ningún fichero `.env` en este equipo.
+- **Las rutas no dependen de este ordenador:**
+  - todas se calculan con `Path(__file__)`, relativas a la raíz del repositorio;
+  - los metadatos usan rutas POSIX relativas;
+  - la única excepción es `.claude/launch.json`, que contiene rutas de este equipo y está excluido de git.

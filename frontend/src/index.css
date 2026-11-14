@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 8 11 17;
+  --surface: 14 18 26;
+  --raised: 20 26 37;
+  --line: 33 41 56;
+  --fg: 229 234 242;
+  --muted: 138 148 167;
+  --flame: 255 122 26;
+  --ember: 255 77 64;
+  --plasma: 76 201 240;
+  --ok: 52 211 153;
+  --warn: 250 204 21;
+  color-scheme: dark;
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-bg text-fg font-sans antialiased;
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgb(var(--plasma) / 0.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgb(var(--flame) / 0.05), transparent 60%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-line bg-surface/80 backdrop-blur-sm; }
+  .label { @apply text-[11px] font-medium uppercase tracking-[0.12em] text-muted; }
+  .num { @apply font-mono tabular-nums; }
+  .input {
+    @apply h-9 w-full rounded-lg border border-line bg-raised px-3 text-sm text-fg placeholder:text-muted/70
+           focus:outline-none focus:ring-2 focus:ring-plasma/40 focus:border-plasma/60;
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-lg border border-line bg-raised px-3 h-9 text-sm font-medium
+           hover:border-plasma/50 hover:text-white transition-colors disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-primary { @apply border-flame/60 bg-flame/15 text-flame hover:bg-flame/25 hover:text-flame; }
+  .prose-sci p { @apply mb-3 leading-relaxed text-fg/90; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 8px; border: 2px solid rgb(var(--bg)); }

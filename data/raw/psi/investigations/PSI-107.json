@@ -1,0 +1,1386 @@
+{
+ "accession": "PSI-107",
+ "acknowledgments": "",
+ "approach": "The experimental setup in the microgravity science glovebox consisted of an apparatus with a flow duct with integrated nozzles, cameras, and fuel delivery systems. Fuels tested included methane, ethylene, propane, propylene, and propylene mixtures. Each flame was ignited in a controlled co-flow air environment, with burner diameters of 0.41 mm, 0.76 mm, and 1.6 mm and co-flow velocities ranging from 5.4 cm/s to 65 cm/s. Fuel flow rates were adjusted to identify the smoke point, marked by the flame's transition to emitting soot. Data such as flame lengths were recorded using still and video cameras. Measurements included flame height, radiative heat losses, and co-flow air velocity distributions. In total 526 flames were studied.",
+ "assays": [],
+ "contacts": [
+  {
+   "@id": "",
+   "address": "",
+   "affiliation": "University of Maryland",
+   "comments": [
+    {
+     "name": "Study Person REF",
+     "value": ""
+    }
+   ],
+   "email": "pbs@umd.edu",
+   "fax": "",
+   "firstName": "Peter",
+   "lastName": "Sunderland",
+   "midInitials": "",
+   "phone": "",
+   "roles": [
+    {
+     "@id": "59J36d8A36ZR1iSs6NNVDRYelIkilTNb30me8Erm",
+     "annotationValue": "Co-Investigator (Co-I)",
+     "comments": [],
+     "termAccession": "Co-Investigator (Co-I)",
+     "termSource": ""
+    }
+   ]
+  },
+  {
+   "@id": "",
+   "address": "",
+   "affiliation": "NASA GRC",
+   "comments": [
+    {
+     "name": "Study Person REF",
+     "value": ""
+    }
+   ],
+   "email": "david.urban@nasa.gov",
+   "fax": "",
+   "firstName": "David",
+   "lastName": "Urban",
+   "midInitials": "",
+   "phone": "",
+   "roles": [
+    {
+     "@id": "dEBvA2jSs25xM9IfCv5ploF8MUDFt0ACKekf97KJ",
+     "annotationValue": "Principal Investigator (PI)",
+     "comments": [],
+     "termAccession": "Principal Investigator (PI)",
+     "termSource": ""
+    }
+   ]
+  }
+ ],
+ "description": "",
+ "dirty": false,
+ "doi": "10.60555/9kbh-e962",
+ "experimentHardware": "Microgravity Science Glovebox (MSG)",
+ "experimentHardwareLink": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Columbus/Microgravity_Science_Glovebox",
+ "experimentalTable": [
+  {
+   "_id": {
+    "$oid": "67a3845a09ed061032c13804"
+   },
+   "date_created": {
+    "$date": 1738769498047
+   },
+   "date_modified": {
+    "$date": 1738769498047
+   },
+   "file_name": "PSI-107_Experimental table_Spice.csv",
+   "file_size": 31205,
+   "remote_path": "/Home/psi-data/PSI-107/Experimental table/PSI-107_Experimental table_Spice.csv",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-107/Experimental table/PSI-107_Experimental table_Spice.csv",
+   "resource_id": {
+    "$oid": "66cf53d46f1142c964b2e0a8"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-107/Experimental table/PSI-107_Experimental table_Spice.csv",
+   "s3_version_id": "m6.SddOXpvfDvWSuuJDaYXuZi6aJd7do",
+   "study_id": {
+    "$oid": "683da136b8656d2315bf4601"
+   },
+   "subcategory": "",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "experiments": [],
+ "factors": [],
+ "filesDisabled": null,
+ "flightProgram": "International Space Station (ISS)",
+ "funding": "",
+ "hypothesis": "The research hypothesizes that by minimizing gravity-driven transport phenomena scientists can study the laminar smoke-point properties of non-buoyant jet diffusion flames. Flame properties are expected to differ significantly from those observed under normal gravity.",
+ "identifiers": [],
+ "images": [],
+ "investigationAcronym": "SPICE",
+ "investigationEndDate": "",
+ "investigationStartDate": "",
+ "licenseIdentifier": "CC0-1.0",
+ "licenseLink": "https://spdx.org/licenses/CC0-1.0.html",
+ "licenseName": "Creative Commons Zero v1.0 Universal",
+ "managingNasaCenter": "Glenn Research Center (GRC)",
+ "missionEnd": "",
+ "missionLink": "",
+ "missionName": "",
+ "missionStart": "",
+ "modifiedDate": "02-Jun-2025",
+ "objective": "The objective of SPICE is to better understand the complex process of combustion by observing flames in a microgravity environment aboard the International Space Station (ISS) and analogous ground experiments.\n\nSpecific objectives were:\n(1) Identify the laminar smoke-point properties of non-buoyant jet diffusion flames under various co-flow conditions in microgravity.\n(2) Determine the effects of burner diameter and co-flow velocity on the luminous flame lengths and smoke points.\n(3) Quantify the sooting propensity of different fuels, such as ethylene, propane, and propylene mixtures.\n(4) Validate the correlation between luminous flame shape and residence time under microgravity conditions.\n(5) Investigate the impact of air and fuel flow rate variations on smoke point phenomena in space.",
+ "organizations": [],
+ "payloads": [],
+ "projectIdentifier": "",
+ "projectLink": "",
+ "projectTitle": "",
+ "projectType": "Microgravity Investigation",
+ "proposalTitle": "",
+ "public": true,
+ "publications": [
+  {
+   "authorList": "Dotson Keenan, Sunderland Peter, Yuan Zeng-Guang, Urban David",
+   "comments": [],
+   "doi": "10.2514/6.2010-1105",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Laminar Smoke Points in Coflow Measured Aboard the International Space Station"
+  },
+  {
+   "authorList": "Sunderland Peter B., Urban David L., Nayagam Vedha",
+   "comments": [],
+   "doi": "10.1007/978-1-4020-8682-3_22",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Scaling of Gas-Jet Flame Lengths in Elevated Gravity"
+  },
+  {
+   "authorList": "RA Spivey, LB Jeter, C Vonk",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "l87xqHQEQuC4rNfO31zRSVlRomoXfQjaWFyzxZZZ",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": ""
+   },
+   "title": "The Microgravity Science Glovebox (MSG), a Resource for Gravity-Dependent Phenomena Research on the International Space Station (ISS)"
+  },
+  {
+   "authorList": "Spivey Reggie, Luz Paul",
+   "comments": [],
+   "doi": "10.2514/6.2006-941",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "The Microgravity Science Glovebox as a Platform for Exploration Research on the International Space Station"
+  },
+  {
+   "authorList": "Dobbins Richard R., Tinjero Jesse, Squeo Joseph, Zhao Xinyu, Hall Robert J., Colket Meredith B., Long Marshall B., Smooke Mitchell D.",
+   "comments": [],
+   "doi": "10.1080/00102202.2022.2041621",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "A Combined Experimental and Computational Study of Soot Formation in Normal and Microgravity Conditions"
+  },
+  {
+   "authorList": "Aalburg C., Diez F.J., Faeth G.M., Sunderland P.B., Urban D.L., Yuan Z.-G.",
+   "comments": [],
+   "doi": "10.1016/j.combustflame.2004.12.009",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Shapes of nonbuoyant round hydrocarbon-fueled laminar-jet diffusion flames in still air"
+  },
+  {
+   "authorList": "LIN K, FAETH G, SUNDERLAND P, URBAN D, YUAN Z",
+   "comments": [],
+   "doi": "10.1016/S0010-2180(98)00100-X",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Shapes of nonbuoyant round luminous hydrocarbon/air laminar jet diffusion flames"
+  },
+  {
+   "authorList": "KT Dotson",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Smoke Points of Microgravity and Normal Gravity Coflow Diffusion"
+  },
+  {
+   "authorList": "Dotson K.T., Sunderland P.B., Yuan Z.-G., Urban D.L.",
+   "comments": [],
+   "doi": "10.1016/j.firesaf.2011.08.002",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Laminar smoke points of coflowing flames in microgravity"
+  }
+ ],
+ "related_glds": "",
+ "releaseDate": "18-Sep-2024",
+ "researchArea": "Combustion Science",
+ "researchImpacts": "(1) Will improve our understanding of soot formation mechanisms and help design safer spacecraft environments.\n(2) Will contribute to refining our computational models for predicting flame behaviors under non-buoyant conditions.\n(3) Will enhance our knowledge of soot generation\n(4) Could possibly provide insights to better fuel formulations and combustion processes.",
+ "restricted": false,
+ "sourceAccession": "",
+ "sourceLink": "",
+ "spaceProgram": "National Aeronautics and Space Administration (NASA)",
+ "subResearchArea": "Fire Safety",
+ "submissionDate": "18-Sep-2024",
+ "title": "Smoke Point In Co-flow Experiment",
+ "totalFileSize": 6946864573.0,
+ "version": 4,
+ "versionMessage": "",
+ "versionMessageLevel": "",
+ "versionMessageLocations": [],
+ "versionReason": "Additional documentation release",
+ "files_latest_version": [
+  {
+   "file_name": "PSI-107_Reports_SMOKE POINTS OF MICROGRAVITY AND  NORMAL GRAVITY COFLOW DIFFUSION  FLAMES_DotsonThesis.pdf",
+   "category": "Reports",
+   "file_size": 2227738.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Science Documents_SPICE_SRD.doc",
+   "category": "Science Documents",
+   "file_size": 1112064.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Reports_SPICE_30-DayPostFlightReport.pdf",
+   "category": "Reports",
+   "file_size": 160909.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Reports_SPICE_FinalReport.pdf",
+   "category": "Reports",
+   "file_size": 601754.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Presentations_SPICE Overview.ppt",
+   "category": "Presentations",
+   "file_size": 28868608.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Presentations_Laminar Smoke Points in Coflow Measured Aboard ISS.pdf",
+   "category": "Presentations",
+   "file_size": 1306705.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Presentations_SPICE-1 Ops Overview and Smoke Point Cue Card.ppt",
+   "category": "Presentations",
+   "file_size": 4048384.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Ethylene assembled smoke hieght slide.  GMT 045 1503      11 26 2011.pptx",
+   "category": "Raw Data",
+   "file_size": 1447201.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Presentations_IP-C Crew training 2010.pdf",
+   "category": "Presentations",
+   "file_size": 1348519.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Presentations_IP-D Crew training 2011.pdf",
+   "category": "Presentations",
+   "file_size": 1339967.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT045_2009_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 93862400.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Spice_Flight_Flamelength.xls",
+   "category": "Raw Data",
+   "file_size": 16896.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_045_SPICE_DSC_num.txt",
+   "category": "Raw Data",
+   "file_size": 1475.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SmokePointReview-0g-3.xlsx",
+   "category": "Raw Data",
+   "file_size": 295735.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_048_SPICE_num.txt",
+   "category": "Raw Data",
+   "file_size": 1577.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT048_2009_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 88787968.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT052_2009_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 229785600.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT055nikon.xls",
+   "category": "Raw Data",
+   "file_size": 4804096.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_055_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 144185344.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_Airflow_Test_VelocityData.xlsx",
+   "category": "Raw Data",
+   "file_size": 258387.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Engineering Documents_SPICE_Phase III Flight Safety Data Package.pdf",
+   "category": "Engineering Documents",
+   "file_size": 4490750.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT058nikon.xls",
+   "category": "Raw Data",
+   "file_size": 11449344.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_058_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 195301888.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_119_ContactSheet.pdf",
+   "category": "Raw Data",
+   "file_size": 68775.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Ign7.mp4",
+   "category": "Raw Data",
+   "file_size": 306843442.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Ign8a.mp4",
+   "category": "Raw Data",
+   "file_size": 37797434.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Ign6.mp4",
+   "category": "Raw Data",
+   "file_size": 332386414.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Ign8.mp4",
+   "category": "Raw Data",
+   "file_size": 80001109.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Ign8b.mp4",
+   "category": "Raw Data",
+   "file_size": 197793111.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT136_Contact_Sheet.pdf",
+   "category": "Raw Data",
+   "file_size": 83835.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_166_SootClean_ContactSheet.pdf",
+   "category": "Raw Data",
+   "file_size": 214153.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_167_ContactSheet.pdf",
+   "category": "Raw Data",
+   "file_size": 149256.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_173_ContactSheet.pdf",
+   "category": "Raw Data",
+   "file_size": 347642.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_174_ContactSheet.pdf",
+   "category": "Raw Data",
+   "file_size": 405360.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT045_2009_NEF.zip",
+   "category": "Raw Data",
+   "file_size": 249350792.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT052_2009_NEF.zip",
+   "category": "Raw Data",
+   "file_size": 660834359.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT052nikon_propy.xls",
+   "category": "Raw Data",
+   "file_size": 5451264.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT048_2009_NEF.zip",
+   "category": "Raw Data",
+   "file_size": 252817183.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Image Organization Guide.docx",
+   "category": "Raw Data",
+   "file_size": 139512.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Spice Flight Test Data II modified.xls",
+   "category": "Raw Data",
+   "file_size": 429568.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_062_NEF.zip",
+   "category": "Raw Data",
+   "file_size": 419536901.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_062_NikonD100_PictureBook.ppt",
+   "category": "Raw Data",
+   "file_size": 161559040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_Airflow_Test_VelocityComparison.xlsx",
+   "category": "Raw Data",
+   "file_size": 93488.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 57 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 19 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 19 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 19 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 36 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 36 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 36 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 57 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 13 mm Station x 57 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Engineering Documents_SPICE-MEM-010.pdf",
+   "category": "Engineering Documents",
+   "file_size": 113106.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_Airflow_Test_Duct Velocity Profiles.xls",
+   "category": "Raw Data",
+   "file_size": 74752.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_AIRFLOW_TEST.ppt",
+   "category": "Raw Data",
+   "file_size": 1302528.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 57 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 19 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 19 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 19 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 36 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 36 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 36 mm Height, OUTSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87040.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 57 mm Height, CENTER.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow Duct Cal - 56 mm Station x 57 mm Height, INSIDE.xls",
+   "category": "Raw Data",
+   "file_size": 87552.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow_EngineeringUnitControl.pptx",
+   "category": "Raw Data",
+   "file_size": 888772.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow_EngineeringUnitControl.xlsx",
+   "category": "Raw Data",
+   "file_size": 650473.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_MASS_FLOW_CALIBRATION.xls",
+   "category": "Raw Data",
+   "file_size": 20480.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow_MFC_settings.xlsx",
+   "category": "Raw Data",
+   "file_size": 60355.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Flow settings_w chart.xls",
+   "category": "Raw Data",
+   "file_size": 27648.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow__Voltage.xlsx",
+   "category": "Raw Data",
+   "file_size": 41334.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow_411259meter.xls",
+   "category": "Raw Data",
+   "file_size": 17408.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_FuelFlow_EngineeringUnitControl.pdf",
+   "category": "Raw Data",
+   "file_size": 909218.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.16.mp4",
+   "category": "Raw Data",
+   "file_size": 16674759.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.20.mp4",
+   "category": "Raw Data",
+   "file_size": 13961465.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.25.mp4",
+   "category": "Raw Data",
+   "file_size": 9916669.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.27.mp4",
+   "category": "Raw Data",
+   "file_size": 8305779.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.32.mp4",
+   "category": "Raw Data",
+   "file_size": 8503851.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.41.mp4",
+   "category": "Raw Data",
+   "file_size": 6824167.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.45.mp4",
+   "category": "Raw Data",
+   "file_size": 4818935.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.39.mp4",
+   "category": "Raw Data",
+   "file_size": 7136093.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_11.55.mp4",
+   "category": "Raw Data",
+   "file_size": 19250645.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_12.06.mp4",
+   "category": "Raw Data",
+   "file_size": 3786122.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_12.03.mp4",
+   "category": "Raw Data",
+   "file_size": 12452117.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_GMT62_12.12.mp4",
+   "category": "Raw Data",
+   "file_size": 15552259.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_119_video.mp4",
+   "category": "Raw Data",
+   "file_size": 82939533.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Engineering Documents_60054MAFH000-C SPICE Experiment Assembly.pdf",
+   "category": "Engineering Documents",
+   "file_size": 591060.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_vlcsnap downlink frame grabs.zip",
+   "category": "Raw Data",
+   "file_size": 48667244.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE Day 045 Test Point Images.zip",
+   "category": "Raw Data",
+   "file_size": 3006740.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE GMT045 2009 Contact Sheets.zip",
+   "category": "Raw Data",
+   "file_size": 86668356.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE GMT045 2009 jpegs.zip",
+   "category": "Raw Data",
+   "file_size": 6793541.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - Ruler.zip",
+   "category": "Raw Data",
+   "file_size": 1028100.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 13.zip",
+   "category": "Raw Data",
+   "file_size": 1291833.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 14.zip",
+   "category": "Raw Data",
+   "file_size": 2116454.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 15.zip",
+   "category": "Raw Data",
+   "file_size": 1317589.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 16.zip",
+   "category": "Raw Data",
+   "file_size": 15486800.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE GMT048 2009 Contact Sheets.zip",
+   "category": "Raw Data",
+   "file_size": 81007511.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE GMT048 2009 jpegs.zip",
+   "category": "Raw Data",
+   "file_size": 9011150.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 25.zip",
+   "category": "Raw Data",
+   "file_size": 9962438.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 26.zip",
+   "category": "Raw Data",
+   "file_size": 2571678.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 27.zip",
+   "category": "Raw Data",
+   "file_size": 4768314.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 28.zip",
+   "category": "Raw Data",
+   "file_size": 1401819.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 29.zip",
+   "category": "Raw Data",
+   "file_size": 4116722.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 30.zip",
+   "category": "Raw Data",
+   "file_size": 2695192.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs - TP 31_Liftoff.zip",
+   "category": "Raw Data",
+   "file_size": 16130682.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 32a.zip",
+   "category": "Raw Data",
+   "file_size": 3797305.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 32b.zip",
+   "category": "Raw Data",
+   "file_size": 5187002.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grab TP 33a.zip",
+   "category": "Raw Data",
+   "file_size": 2006337.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 33b.zip",
+   "category": "Raw Data",
+   "file_size": 2197497.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 33c.zip",
+   "category": "Raw Data",
+   "file_size": 4781942.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP34.zip",
+   "category": "Raw Data",
+   "file_size": 1193949.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 35_36.zip",
+   "category": "Raw Data",
+   "file_size": 12274813.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 36b.zip",
+   "category": "Raw Data",
+   "file_size": 9253993.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 36c.zip",
+   "category": "Raw Data",
+   "file_size": 3585884.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP36d.zip",
+   "category": "Raw Data",
+   "file_size": 4269717.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 36e.zip",
+   "category": "Raw Data",
+   "file_size": 9201580.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs 36f.zip",
+   "category": "Raw Data",
+   "file_size": 7380242.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 36g_i.zip",
+   "category": "Raw Data",
+   "file_size": 5850017.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 36j_last_propane.zip",
+   "category": "Raw Data",
+   "file_size": 1975000.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 37.zip",
+   "category": "Raw Data",
+   "file_size": 2270519.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 38.zip",
+   "category": "Raw Data",
+   "file_size": 2079704.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 39_40.zip",
+   "category": "Raw Data",
+   "file_size": 8464802.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 41_42.zip",
+   "category": "Raw Data",
+   "file_size": 7295379.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 43_44.zip",
+   "category": "Raw Data",
+   "file_size": 1567786.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 43a_44a.zip",
+   "category": "Raw Data",
+   "file_size": 12361194.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 45.zip",
+   "category": "Raw Data",
+   "file_size": 12648978.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 46.zip",
+   "category": "Raw Data",
+   "file_size": 7904508.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 49_50.zip",
+   "category": "Raw Data",
+   "file_size": 8551760.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 51_52.zip",
+   "category": "Raw Data",
+   "file_size": 12471156.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 53.zip",
+   "category": "Raw Data",
+   "file_size": 10647838.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT052_2009_ContactSheet.zip",
+   "category": "Raw Data",
+   "file_size": 208600503.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT052_2009_jpegs.zip",
+   "category": "Raw Data",
+   "file_size": 131468585.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Still Images.zip",
+   "category": "Raw Data",
+   "file_size": 32841324.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 55.zip",
+   "category": "Raw Data",
+   "file_size": 9856113.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 57.zip",
+   "category": "Raw Data",
+   "file_size": 8529955.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 59.zip",
+   "category": "Raw Data",
+   "file_size": 15806483.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 61.zip",
+   "category": "Raw Data",
+   "file_size": 15345342.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 63.zip",
+   "category": "Raw Data",
+   "file_size": 7125231.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 65.zip",
+   "category": "Raw Data",
+   "file_size": 24931159.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 67.zip",
+   "category": "Raw Data",
+   "file_size": 5983015.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 67A.zip",
+   "category": "Raw Data",
+   "file_size": 6958490.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_055_Contact Sheet.zip",
+   "category": "Raw Data",
+   "file_size": 128123447.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_055_jpeg.zip",
+   "category": "Raw Data",
+   "file_size": 77523642.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_055_NEF.zip",
+   "category": "Raw Data",
+   "file_size": 462755461.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs Playback Images.zip",
+   "category": "Raw Data",
+   "file_size": 36986942.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 73.zip",
+   "category": "Raw Data",
+   "file_size": 13888709.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 75.zip",
+   "category": "Raw Data",
+   "file_size": 8506451.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 77.zip",
+   "category": "Raw Data",
+   "file_size": 6871867.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 79.zip",
+   "category": "Raw Data",
+   "file_size": 8760961.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 81.zip",
+   "category": "Raw Data",
+   "file_size": 7225091.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 83.zip",
+   "category": "Raw Data",
+   "file_size": 3020070.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 85.zip",
+   "category": "Raw Data",
+   "file_size": 8570510.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 87.zip",
+   "category": "Raw Data",
+   "file_size": 7088473.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 89.zip",
+   "category": "Raw Data",
+   "file_size": 7480137.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 90B.zip",
+   "category": "Raw Data",
+   "file_size": 12452901.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 90C.zip",
+   "category": "Raw Data",
+   "file_size": 11533246.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame GrabsTP 90D Manual Camera 0.4mm.zip",
+   "category": "Raw Data",
+   "file_size": 7928483.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 90E Manual Camera 0.8mm.zip",
+   "category": "Raw Data",
+   "file_size": 6583973.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0091_2_1.6Nzl.zip",
+   "category": "Raw Data",
+   "file_size": 5941456.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0091.zip",
+   "category": "Raw Data",
+   "file_size": 471593.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0093.zip",
+   "category": "Raw Data",
+   "file_size": 497308.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0093_4.zip",
+   "category": "Raw Data",
+   "file_size": 5021587.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0095.zip",
+   "category": "Raw Data",
+   "file_size": 482684.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 95_6.zip",
+   "category": "Raw Data",
+   "file_size": 3347611.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0096.zip",
+   "category": "Raw Data",
+   "file_size": 699983.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0096B_C.zip",
+   "category": "Raw Data",
+   "file_size": 2514382.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0096D_E.zip",
+   "category": "Raw Data",
+   "file_size": 3493414.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0097.zip",
+   "category": "Raw Data",
+   "file_size": 583538.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0097_8_0.8Nzl.zip",
+   "category": "Raw Data",
+   "file_size": 3443882.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0099.zip",
+   "category": "Raw Data",
+   "file_size": 482926.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0099_100.zip",
+   "category": "Raw Data",
+   "file_size": 2910586.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0101.zip",
+   "category": "Raw Data",
+   "file_size": 258787.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0101_102_end_of 1st bottle.zip",
+   "category": "Raw Data",
+   "file_size": 1789047.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0102.zip",
+   "category": "Raw Data",
+   "file_size": 1228372.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0102_b_NewBottle_Fumi.zip",
+   "category": "Raw Data",
+   "file_size": 9278310.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_062 TP 103 vlcsnap-4272441.zip",
+   "category": "Raw Data",
+   "file_size": 422650.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0103a_e_104_0.4Nzl.zip",
+   "category": "Raw Data",
+   "file_size": 4144346.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0103f_blowoff.zip",
+   "category": "Raw Data",
+   "file_size": 2122778.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0104.zip",
+   "category": "Raw Data",
+   "file_size": 1492110.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0104_1.zip",
+   "category": "Raw Data",
+   "file_size": 855618.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Downlink Frame Grabs TP 0104b.zip",
+   "category": "Raw Data",
+   "file_size": 9100966.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_Focus Check - Flight Hdwr.nef",
+   "category": "Raw Data",
+   "file_size": 11226428.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_062_jpegs.zip",
+   "category": "Raw Data",
+   "file_size": 94753456.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_062_Movie Files.zip",
+   "category": "Raw Data",
+   "file_size": 71809994.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Raw Data_SPICE_GMT2009_119_video.avi",
+   "category": "Raw Data",
+   "file_size": 1228746628.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Reference Data_SPICE_VIDEO OVERLAY RESET.pdf",
+   "category": "Reference Data",
+   "file_size": 1060135.0,
+   "version": 1
+  },
+  {
+   "file_name": "PSI-107_Engineering Documents_SPICE_ScienceVerificationReport.pdf",
+   "category": "Engineering Documents",
+   "file_size": 237000.0,
+   "version": 1
+  }
+ ]
+}
