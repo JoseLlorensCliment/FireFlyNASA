@@ -6,6 +6,8 @@ import { api } from "@/services/api";
 import { Card, CardHeader, ErrorState, Loading, Stat } from "@/components/ui/primitives";
 import { Plot, PALETTE } from "@/components/Plot";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { FlamePhysicsVisualizer } from "@/components/FlamePhysicsVisualizer";
+import { EarthSpinoffs } from "@/components/EarthSpinoffs";
 import { PHASE_LABEL, ROLE_META } from "@/lib/utils";
 
 const VAR_LABEL: Record<string, string> = {
@@ -67,6 +69,8 @@ export default function Dashboard() {
             <Stat label="Harmonized variables" value={data.n_harmonized_variables}
               hint="unit-converted, with provenance" />
           </section>
+
+          <FlamePhysicsVisualizer />
 
           <section className="grid gap-4 lg:grid-cols-3">
             <Card className="lg:col-span-2">
@@ -160,6 +164,8 @@ export default function Dashboard() {
               </Card>
             </div>
           </section>
+
+          <EarthSpinoffs />
 
           <p className="text-[11px] text-muted">
             Source: {data.source}. Snapshot built {data.built_at.replace("T", " ").replace("+00:00", " UTC")}.

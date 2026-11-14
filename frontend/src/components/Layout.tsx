@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { BarChart3, Bot, FileText, FlaskConical, GitCompareArrows, LayoutDashboard, Menu, ShieldAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { JuryTourButton } from "@/components/JuryTourModal";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, ready: true },
@@ -57,7 +58,8 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="flex min-h-full">
       <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line/70 bg-surface/60 px-4 py-5 lg:flex">
         <Logo />
-        <div className="mt-8 label px-3">Navigate</div>
+        <JuryTourButton className="mt-5 w-full justify-center" />
+        <div className="mt-6 label px-3">Navigate</div>
         <div className="mt-2"><NavItems /></div>
         <div className="mt-auto space-y-2 rounded-lg border border-line/70 bg-raised/50 p-3 text-[11px] leading-relaxed text-muted">
           <div className="flex items-center gap-1.5 font-medium text-fg/80"><BarChart3 className="h-3.5 w-3.5 text-plasma" /> Data source</div>
@@ -68,9 +70,12 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-line/70 bg-bg/85 px-4 py-3 backdrop-blur lg:hidden">
           <Logo />
+          <div className="flex items-center gap-2">
+          <JuryTourButton className="hidden sm:inline-flex" />
           <button className="btn h-9 w-9 justify-center p-0" aria-label="Open menu" onClick={() => setOpen(true)}>
             <Menu className="h-4 w-4" />
           </button>
+          </div>
         </header>
         {open && (
           <div className="fixed inset-0 z-40 lg:hidden">
@@ -82,6 +87,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   <X className="h-4 w-4" />
                 </button>
               </div>
+              <JuryTourButton className="mb-4 w-full justify-center" />
               <NavItems onNavigate={() => setOpen(false)} />
             </div>
           </div>
