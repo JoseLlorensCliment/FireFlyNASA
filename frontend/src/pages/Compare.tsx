@@ -146,7 +146,7 @@ export default function Compare() {
         are flagged automatically — a comparison is never assumed to be like-for-like.
       </PageHeader>
 
-      <Card className="mb-5 p-4">
+      <Card className="relative z-30 mb-5 p-4">
         <Picker selected={ids} onChange={setIds} />
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4 text-xs">
           <span className="text-muted">Presets</span>

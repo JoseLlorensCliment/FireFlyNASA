@@ -49,7 +49,7 @@ export default function Reports() {
           the PSI database; the optional AI discussion is drafted only from retrieved NASA sources and keeps its citations.
         </PageHeader>
 
-        <Card className="mb-6">
+        <Card className="relative z-30 mb-6">
           <CardHeader title="Report setup" subtitle="Pick a question and the investigations it draws on. Nothing is sent until you generate." />
           <div className="space-y-5 p-5">
             <label className="block">
