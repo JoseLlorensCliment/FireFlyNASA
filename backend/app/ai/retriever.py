@@ -1,6 +1,7 @@
 """Semantic retrieval over the NASA corpus (FAISS, cosine similarity)."""
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from functools import lru_cache
@@ -20,17 +21,29 @@ def _load():
     rag = get_settings().data_dir / "processed" / "rag"
     if not (rag / "index.faiss").exists():
         raise RuntimeError("RAG index not found. Run: python pipeline/build_rag_index.py")
+    for f in ("manifest.json", "chunks.jsonl"):
+        if not (rag / f).exists():
+            raise RuntimeError(f"RAG index is incomplete: {f} is missing. Re-run: python pipeline/build_rag_index.py --stage index")
     manifest = json.loads((rag / "manifest.json").read_text(encoding="utf-8"))
-    built_with = manifest.get("embedding", {})
-    current = signature()
-    if built_with and built_with != current:
+    missing = {"n_chunks", "dim", "embedding", "chunks_sha256_16"} - set(manifest)
+    if missing:
+        raise RuntimeError(f"RAG manifest is incomplete or from an older builder (missing {sorted(missing)}); rebuild the index.")
+    built_with, current = manifest["embedding"], signature()
+    if built_with != current:
         raise RuntimeError(f"RAG index was built with {built_with} but the API is configured for {current}. "
                            "Use the same EMBEDDING_* settings or rebuild the index.")
+    digest = hashlib.sha256((rag / "chunks.jsonl").read_bytes()).hexdigest()[:16]
+    if digest != manifest["chunks_sha256_16"]:
+        raise RuntimeError("chunks.jsonl does not match the index (it was regenerated after indexing); "
+                           "run --stage embed and --stage index again.")
     index = faiss.read_index(str(rag / "index.faiss"))
     with (rag / "chunks.jsonl").open(encoding="utf-8") as fh:
         chunks = [json.loads(line) for line in fh]
-    if index.ntotal != len(chunks):
-        raise RuntimeError(f"Index has {index.ntotal} vectors but chunks.jsonl has {len(chunks)} lines; rebuild.")
+    if index.ntotal != len(chunks) or index.ntotal != manifest["n_chunks"]:
+        raise RuntimeError(f"Index has {index.ntotal} vectors, chunks.jsonl {len(chunks)} lines, manifest "
+                           f"{manifest['n_chunks']}; the index is incomplete — rebuild it.")
+    if index.d != manifest["dim"] or index.d != current["dim"]:
+        raise RuntimeError(f"Index dimension {index.d} != expected {current['dim']}; rebuild the index.")
     return index, chunks
 
 

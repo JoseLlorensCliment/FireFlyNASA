@@ -52,3 +52,33 @@ def test_compare_flags_inverse_flame_oxygen():
     d = client.get("/api/compare", params={"ids": "PSI-159,PSI-10"}).json()
     assert any(w["title"] == "Inverse flames" for w in d["warnings"])
     assert next(v for v in d["variables"] if v["key"] == "o2")["status"] == "caution"
+
+
+def test_insights_endpoints_are_descriptive_and_documented():
+    for path in ("atmospheres", "flex-suppression", "saffire-gravity", "bass2-products"):
+        d = client.get(f"/api/insights/{path}").json()
+        assert d["method"]
+    atm = client.get("/api/insights/atmospheres").json()
+    assert atm["totals"]["ambient_rows_in_moon_region"] <= atm["totals"]["ambient_rows"]
+    rel = client.get("/api/insights/relevance").json()
+    assert "NOT a fire-risk score" in rel["method"]
+    assert all(0 <= c["value"] <= 1 for i in rel["investigations"] for c in i["criteria"].values())
+
+
+def test_report_without_ai_is_deterministic_markdown():
+    r = client.post("/api/reports", json={"question": "Suppression in FLEX vs BASS", "accessions": ["PSI-69", "PSI-26"]})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["ai"] is None and d["comparison"]["warnings"]
+    md = d["markdown"]
+    for h in ("Research question", "Investigations consulted", "Relevant data", "Comparison", "Limitations", "References"):
+        assert h in md
+    assert "10.60555/mbq8-0451" in md  # FLEX dataset DOI
+    assert client.post("/api/reports", json={"question": "x?", "accessions": []}).status_code == 422
+
+
+def test_report_with_ai_degrades_gracefully_without_index_or_key(monkeypatch):
+    from app.ai import retriever
+    monkeypatch.setattr(retriever, "_load", lambda: (_ for _ in ()).throw(RuntimeError("RAG index not found")))
+    d = client.post("/api/reports", json={"question": "Oxygen effects?", "accessions": ["PSI-69"], "include_ai": True}).json()
+    assert d["ai"]["mode"] == "unavailable" and "AI discussion unavailable" in d["markdown"]

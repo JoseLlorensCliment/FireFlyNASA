@@ -44,3 +44,21 @@ body {
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 8px; border: 2px solid rgb(var(--bg)); }
+
+/* Report typography */
+.report h1 { @apply mb-2 text-2xl font-semibold tracking-tight; }
+.report h2 { @apply mb-2 mt-7 border-b border-line pb-1 text-lg font-semibold text-flame; }
+.report p { @apply mb-3 text-sm leading-relaxed text-fg/90; }
+.report ul { @apply mb-3 list-disc space-y-1 pl-5 text-sm text-fg/90; }
+.report table { @apply mb-3 block w-full overflow-x-auto text-xs; }
+.report th, .report td { @apply border border-line px-2 py-1 text-left align-top; }
+.report th { @apply bg-raised; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .card { border: none !important; background: #fff !important; }
+  .report, .report * { color: #000 !important; }
+  .report th { background: #eee !important; }
+  .report table { display: table; }
+}

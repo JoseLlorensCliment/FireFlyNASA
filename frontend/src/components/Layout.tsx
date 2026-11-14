@@ -8,8 +8,8 @@ const NAV = [
   { to: "/experiments", label: "Experiments", icon: FlaskConical, ready: true },
   { to: "/compare", label: "Compare", icon: GitCompareArrows, ready: true },
   { to: "/assistant", label: "AI Assistant", icon: Bot, ready: true },
-  { to: "/safety", label: "Safety Insights", icon: ShieldAlert, ready: false },
-  { to: "/reports", label: "Reports", icon: FileText, ready: false },
+  { to: "/safety", label: "Safety Insights", icon: ShieldAlert, ready: true },
+  { to: "/reports", label: "Reports", icon: FileText, ready: true },
 ];
 
 function Logo() {
@@ -55,7 +55,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const loc = useLocation();
   return (
     <div className="flex min-h-full">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line/70 bg-surface/60 px-4 py-5 lg:flex">
+      <aside className="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line/70 bg-surface/60 px-4 py-5 lg:flex">
         <Logo />
         <div className="mt-8 label px-3">Navigate</div>
         <div className="mt-2"><NavItems /></div>
@@ -66,7 +66,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line/70 bg-bg/85 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-line/70 bg-bg/85 px-4 py-3 backdrop-blur lg:hidden">
           <Logo />
           <button className="btn h-9 w-9 justify-center p-0" aria-label="Open menu" onClick={() => setOpen(true)}>
             <Menu className="h-4 w-4" />

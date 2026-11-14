@@ -16,13 +16,15 @@ class Settings(BaseSettings):
     db_path: Path = ROOT / "data" / "processed" / "flame.db"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
-    # --- Generative model (answers) ------------------------------------------
-    llm_provider: str = "gemini"                  # gemini | groq
-    gemini_api_key: str | None = None             # env: GEMINI_API_KEY
-    gemini_model: str = "gemini-3.8-flash"
-    gemini_thinking_level: str | None = None      # low | medium | high (empty = model default)
-    groq_api_key: str | None = None               # env: GROQ_API_KEY (legacy option)
-    groq_model: str = "llama-3.3-70b-versatile"
+    # --- Generative model: writes the chatbot / report answers -----------------
+    llm_provider: str = "groq"                    # groq (default, free plan) | gemini (optional)
+    groq_api_key: str | None = None               # env: GROQ_API_KEY
+    groq_model: str = "openai/gpt-oss-120b"       # free plan, supports JSON output
+    groq_reasoning_effort: str | None = "low"     # low | medium | high (gpt-oss); keeps token use low
+    groq_max_tokens: int = 2048                   # free plan: 8K tokens/minute for gpt-oss-120b
+    gemini_api_key: str | None = None             # env: GEMINI_API_KEY — used for the embedding API
+    gemini_model: str = "gemini-3.8-flash"        # only if LLM_PROVIDER=gemini
+    gemini_thinking_level: str | None = None
 
     # --- Embeddings (retrieval) -------------------------------------------------
     embedding_provider: str = "google"            # google | local

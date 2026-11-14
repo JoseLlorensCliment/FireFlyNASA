@@ -30,7 +30,7 @@ const WARN_ICON = { critical: AlertOctagon, warning: AlertTriangle, info: Info }
 const WARN_CLS = { critical: "border-ember/40 bg-ember/5", warning: "border-warn/30 bg-warn/5", info: "border-plasma/30 bg-plasma/5" };
 const WARN_ICON_CLS = { critical: "text-ember", warning: "text-warn", info: "text-plasma" };
 
-function Picker({ selected, onChange }: { selected: string[]; onChange: (ids: string[]) => void }) {
+export function Picker({ selected, onChange }: { selected: string[]; onChange: (ids: string[]) => void }) {
   const { data } = useQuery({ queryKey: ["investigations", {}], queryFn: () => api.investigations({ sort: "name" }) });
   const [open, setOpen] = useState(false);
   const label = (acc: string) => data?.find((d) => d.accession === acc)?.acronym ?? acc;

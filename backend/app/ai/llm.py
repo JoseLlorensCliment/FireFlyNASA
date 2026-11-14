@@ -1,8 +1,10 @@
-"""Generative-model adapter (JSON answers for the RAG assistant).
+"""Generative-model adapter: the model that WRITES the chatbot and report answers (JSON).
 
-LLM_PROVIDER=gemini (default): Gemini API, model GEMINI_MODEL (default gemini-3.8-flash),
-                               called through google-genai `models.generate_content`.
-LLM_PROVIDER=groq            : legacy option kept from the first prototype.
+LLM_PROVIDER=groq (default): Groq API (free plan), model GROQ_MODEL (default openai/gpt-oss-120b),
+                             JSON object mode, reasoning effort GROQ_REASONING_EFFORT.
+LLM_PROVIDER=gemini        : optional, Gemini API via google-genai `models.generate_content`.
+
+Searching the documents (embeddings) is a different model: see app/ai/embeddings.py.
 """
 from __future__ import annotations
 
@@ -51,12 +53,13 @@ def _groq(system: str, user: str, temperature: float, max_tokens: int) -> tuple[
         raise LLMUnavailable("GROQ_API_KEY is not set. Add it to .env to enable generated answers.")
     from groq import Groq
 
+    extra = {"reasoning_effort": s.groq_reasoning_effort} if s.groq_reasoning_effort else None
     try:
         resp = Groq(api_key=s.groq_api_key).chat.completions.create(
-            model=s.groq_model, temperature=temperature, max_tokens=max_tokens,
+            model=s.groq_model, temperature=temperature, max_tokens=min(max_tokens, s.groq_max_tokens),
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-            response_format={"type": "json_object"})
-    except Exception as exc:  # noqa: BLE001
+            response_format={"type": "json_object"}, extra_body=extra)
+    except Exception as exc:  # noqa: BLE001 - surface provider errors (rate limit 429, auth, model id)
         raise LLMUnavailable(f"Groq request failed: {exc}") from exc
     return _parse(resp.choices[0].message.content), s.groq_model
 
@@ -64,8 +67,8 @@ def _groq(system: str, user: str, temperature: float, max_tokens: int) -> tuple[
 def complete_json(system: str, user: str, temperature: float = 0.1, max_tokens: int = 8192) -> tuple[dict, str]:
     """Return (parsed JSON object, model id)."""
     provider = get_settings().llm_provider
-    if provider == "gemini":
-        return _gemini(system, user, max_tokens)
     if provider == "groq":
         return _groq(system, user, temperature, max_tokens)
-    raise LLMUnavailable(f"Unsupported LLM_PROVIDER '{provider}' (use gemini or groq)")
+    if provider == "gemini":
+        return _gemini(system, user, max_tokens)
+    raise LLMUnavailable(f"Unsupported LLM_PROVIDER '{provider}' (use groq or gemini)")

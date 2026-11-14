@@ -44,3 +44,44 @@ def test_retrieval_only_when_llm_unavailable(monkeypatch):
     r = assistant.ask("oxygen effects")
     assert r["mode"] == "retrieval_only" and r["answer"] is None and len(r["sources"]) == 2
     assert assistant._CACHE == {}  # failures are not cached
+
+
+def test_groq_adapter_sends_json_mode_and_reasoning_effort(monkeypatch):
+    """No network: the Groq client is replaced by a fake that records the request."""
+    import sys as _sys
+    from types import ModuleType, SimpleNamespace
+
+    from app.ai import llm
+    from app.core.config import Settings
+
+    sent = {}
+
+    class FakeGroq:
+        def __init__(self, api_key):
+            sent["api_key_set"] = bool(api_key)
+            self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
+
+        def create(self, **kw):
+            sent.update(kw)
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"answer": "ok [S1]"}'))])
+
+    fake_mod = ModuleType("groq")
+    fake_mod.Groq = FakeGroq
+    monkeypatch.setitem(_sys.modules, "groq", fake_mod)
+    monkeypatch.setattr(llm, "get_settings", lambda: Settings(llm_provider="groq", groq_api_key="k"))
+    data, model = llm.complete_json("sys", "user", max_tokens=8192)
+    assert data == {"answer": "ok [S1]"} and model == "openai/gpt-oss-120b"
+    assert sent["response_format"] == {"type": "json_object"}
+    assert sent["extra_body"] == {"reasoning_effort": "low"} and sent["max_tokens"] == 2048
+
+
+def test_missing_groq_key_gives_clear_error(monkeypatch):
+    from app.ai import llm
+    from app.core.config import Settings
+
+    monkeypatch.setattr(llm, "get_settings", lambda: Settings(llm_provider="groq", groq_api_key=None))
+    try:
+        llm.complete_json("s", "u")
+        raise AssertionError("expected LLMUnavailable")
+    except llm.LLMUnavailable as exc:
+        assert "GROQ_API_KEY" in str(exc)

@@ -3,7 +3,8 @@
 > **Proyecto:** Flame Intelligence (NASA Space Apps 2026 · *Flame in Freefall*)
 > **Fecha del traspaso:** 14 nov 2026
 > **Motivo:** el equipo actual (AMD Athlon antiguo, 8 GB de RAM) no es adecuado para el procesamiento pesado. La
-> extracción del corpus, los embeddings y el índice FAISS se harán en otro ordenador usando la **API de Gemini**.
+> extracción del corpus, los embeddings y el índice FAISS se harán en otro ordenador. **Toda la IA va por API, ninguna en
+> local:** Groq redacta las respuestas y la API de embeddings de Google genera los vectores de búsqueda.
 > **Para la IA que continúe:** aquí está todo lo que se ha hecho, verificado y decidido. Lo que **no** está verificado
 > aparece marcado como ⚠️ *no probado*. No hace falta volver a investigar nada de lo que figura en este documento.
 
@@ -15,11 +16,13 @@
    construirlo (embeddings locales en CPU) se interrumpió dos veces antes de escribir nada en disco.
 2. Los **documentos NASA originales ya están descargados**: 79 PDF (185,8 MB), con checksums en
    `data/metadata/psi_documents_inventory.csv`.
-3. **El código del RAG está terminado y probado con tests** (23 tests, sin red): extracción, chunking, embeddings con
-   Gemini, FAISS, recuperación, generación con citas y validación.
+3. **El código del RAG está terminado y probado con tests** (29 tests, sin red): extracción, chunking, embeddings con
+   Google, FAISS, recuperación, generación con citas (Groq) y validación.
 4. La construcción tiene **3 etapas reanudables**: `chunks → embed → index`. La etapa `embed` guarda un punto de control
    por lote y se puede interrumpir y relanzar.
-5. Modelo generativo: **`gemini-3.8-flash`** (verificado en la documentación oficial; estable).
+5. Modelo generativo (redacta las respuestas del chatbot y los informes): **Groq `openai/gpt-oss-120b`**, del plan
+   gratuito y con salida JSON (verificado en la documentación de Groq el 14 nov 2026). Decisión del equipo: Groq
+   porque es gratuito.
 6. Modelo de embeddings: **`gemini-embedding-001`** a **768 dimensiones** (recomendación). Alternativa:
    `gemini-embedding-2`.
 7. Única variable secreta: **`GEMINI_API_KEY`**, en `.env`. No hay ninguna clave en el repositorio.
@@ -27,9 +30,8 @@
    `faiss-cpu` tiene wheel para Windows.
 9. **Pendiente en el otro ordenador:** obtener los PDF → `build_dataset` → `chunks` → `embed` → `index` →
    `rag_smoke_test`.
-10. ⚠️ **No probado con la API real:** ninguna llamada a Gemini se ha ejecutado de verdad (no había clave en este
-    equipo). El código usa campos y métodos que existen en el SDK `google-genai==2.34.0` (inspeccionado) y se ha probado
-    con un cliente simulado.
+10. ⚠️ **No probado con las API reales:** no se ha hecho ninguna llamada real a Groq ni a Google (no había claves en
+    este equipo). El código se ha probado con clientes simulados que verifican los parámetros enviados.
 
 ---
 
@@ -49,10 +51,10 @@
 | Código de construcción (3 etapas) | ✅ Escrito y probado con tests simulados | `pipeline/build_rag_index.py` |
 | Código de servicio (retriever, LLM, citas) | ✅ Escrito y probado con tests simulados | `backend/app/ai/` |
 | Script de validación | ✅ Escrito y probado con un índice simulado | `pipeline/rag_smoke_test.py` |
-| Llamadas reales a Gemini | ⚠️ **No probadas** (no había clave) | — |
+| Llamadas reales a Groq y a Google embeddings | ⚠️ **No probadas** (no había claves) | — |
 
 **Qué no hay que repetir:** la descarga de metadatos y CSV, la normalización (el código), el diseño de chunking y
-citas, la investigación de los modelos de Gemini, ni la fijación de versiones de las dependencias.
+citas, la investigación de los modelos de Groq y Google, ni la fijación de versiones de las dependencias.
 
 ---
 
@@ -63,11 +65,11 @@ citas, la investigación de los modelos de Gemini, ni la fijación de versiones 
 ┌───────────────────────────────────────────────────────────────────┐   ┌────────────────────────────────────────────┐
 │ data/raw/psi/documents/*.pdf ─┐                                   │   │ POST /api/assistant/ask {question}         │
 │ data/raw/nasa_docs/*.pdf ─────┼─ PyMuPDF ─ limpieza ─ chunking ─┐ │   │   │                                        │
-│ data/processed/flame.db ──────┘  (registros PSI + resúmenes     │ │   │   ├─ embed_query (Gemini embeddings)       │
+│ data/processed/flame.db ──────┘  (registros PSI + resúmenes     │ │   │   ├─ embed_query (Google embeddings)       │
 │                                   deterministas de tablas)      │ │   │   ├─ FAISS top-k + reglas de diversidad    │
 │                       [etapa chunks] → rag/chunks.jsonl ◄───────┘ │   │   ├─ prompt con fuentes [S1..Sk]           │
-│                       [etapa embed]  → rag/embed_cache/…/*.npy    │   │   ├─ gemini-3.8-flash → JSON               │
-│                          (Gemini embeddings, por lotes, reanudable)│  │   └─ validación de citas → respuesta      │
+│                       [etapa embed]  → rag/embed_cache/…/*.npy    │   │   ├─ Groq gpt-oss-120b → JSON              │
+│                          (Google embeddings, por lotes, reanudable)│  │   └─ validación de citas → respuesta      │
 │                       [etapa index]  → rag/index.faiss            │   │        + fuentes (PDF#page / PSI URL)     │
 │                                       rag/manifest.json           │   └────────────────────────────────────────────┘
 └───────────────────────────────────────────────────────────────────┘
@@ -76,8 +78,8 @@ citas, la investigación de los modelos de Gemini, ni la fijación de versiones 
 **Cambios de arquitectura respecto al prototipo anterior** (mínimos, ya aplicados):
 
 1. **Proveedor de embeddings configurable** (`EMBEDDING_PROVIDER=google|local`). Antes solo había fastembed local.
-2. **Proveedor del LLM configurable** (`LLM_PROVIDER=gemini|groq`). Gemini pasa a ser el predeterminado y Groq queda
-   como opción heredada.
+2. **Proveedor del LLM configurable** (`LLM_PROVIDER=groq|gemini`). **Groq es el predeterminado** (decisión del equipo:
+   es gratuito). Gemini queda como alternativa opcional.
 3. **Construcción por etapas reanudables.** Antes era un único paso en memoria, y por eso se perdía todo al
    interrumpirse.
 4. **El `manifest.json` registra el modelo y la dimensión de los embeddings.** La API **se niega** a usar un índice
@@ -97,10 +99,10 @@ flame-intelligence/
 │   ├── app/core/config.py            todas las variables de entorno y sus valores por defecto
 │   ├── app/ai/embeddings.py          embeddings Google / local + normalización + reintentos
 │   ├── app/ai/retriever.py           carga de FAISS, comprobación del manifest, búsqueda
-│   ├── app/ai/llm.py                 adaptador Gemini (y Groq)
+│   ├── app/ai/llm.py                 adaptador del LLM: Groq (predeterminado) o Gemini
 │   ├── app/ai/assistant.py           prompt, ensamblado de fuentes y validación de citas
 │   ├── app/api/assistant.py          endpoints /api/assistant/* y /api/documents/{chunk_id}
-│   └── tests/                        23 tests (test_rag_pipeline.py cubre el RAG)
+│   └── tests/                        29 tests (test_rag_pipeline.py cubre el RAG)
 ├── pipeline/
 │   ├── fetch_psi.py                  descarga desde el PSI (metadatos, CSV, PDF con --docs)
 │   ├── parsing.py, build_dataset.py  normalización → data/processed/flame.db
@@ -158,7 +160,7 @@ El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
 | `pipeline/build_rag_index.py --stage index` | Vectores → FAISS `IndexFlatIP` y `manifest.json` | No | ✅ Probado con tests |
 | `pipeline/build_rag_index.py --limit N --out <dir>` | Construcción mínima de prueba (los N primeros chunks) | Muy ligero | ✅ Probado con tests |
 | `pipeline/rag_smoke_test.py [--answer]` | Valida el índice, la recuperación y una respuesta con citas | Ligero (1 llamada LLM) | ✅ Probado con un índice simulado (sin `--answer`) |
-| `python -m pytest -q backend/tests` | 23 tests unitarios y de API, sin red | Ligero | ✅ 23/23 pasan |
+| `python -m pytest -q backend/tests` | 29 tests unitarios y de API, sin red | Ligero | ✅ 29/29 pasan |
 
 **Detalle de la limpieza y el chunking** (`clean`, `split`, `pdf_chunks`):
 - Se quitan los guiones suaves, se sustituyen las ligaduras (ﬁ → fi, ﬂ → fl), se unen las palabras partidas con guion
@@ -177,13 +179,13 @@ El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
 
 | Paquete | Versión | Uso |
 |---|---|---|
-| `google-genai` | **2.34.0** (29 oct 2026) | Gemini: generación y embeddings |
+| `google-genai` | **2.34.0** (29 oct 2026) | API de embeddings de Google (y LLM Gemini opcional) |
+| `groq` | 0.13.0 | LLM: respuestas del chatbot y de los informes |
 | `pydantic` | **2.14.1** | `google-genai` 2.34.0 exige ≥2.12.5. Corregido: antes estaba en 2.10.2, que era incompatible |
 | `faiss-cpu` | 1.9.0.post1 | Índice vectorial (tiene wheel `win_amd64`) |
 | `pymupdf` | 1.24.14 | Extracción de texto de los PDF |
 | `numpy` | 2.1.3 | Vectores |
 | `fastembed` | 0.4.2 | Solo si `EMBEDDING_PROVIDER=local` (opcional) |
-| `groq` | 0.13.0 | Solo si `LLM_PROVIDER=groq` (opción heredada) |
 
 - Comprobado en este equipo: `uv pip check` dice «All installed packages are compatible», y
   `uv pip compile --python-platform windows --python-version 3.12` resuelve 69 paquetes sin conflictos.
@@ -191,7 +193,39 @@ El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
 
 ---
 
-## 7. Configuración de Gemini
+## 7. Configuración de la IA: Groq (respuestas) + Google (búsqueda)
+
+### 7.0 Qué hace cada modelo (decisión del equipo, 14 nov 2026)
+
+| Pieza | Qué hace | Servicio | Clave |
+|---|---|---|---|
+| **LLM** | Redacta las respuestas del chatbot y la discusión de los informes, a partir de los fragmentos encontrados y con citas `[S#]` | **Groq**, `openai/gpt-oss-120b` | `GROQ_API_KEY` |
+| **Embeddings** | Convierte cada fragmento de los PDF y cada pregunta en un vector para **buscar** en FAISS | **API de Google**, `gemini-embedding-001` | `GEMINI_API_KEY` |
+
+- **Groq no ofrece modelos de embeddings.** La lista de modelos de Groq (https://console.groq.com/docs/models,
+  consultada el 14 nov 2026) solo contiene modelos de texto, voz (Whisper, Orpheus) y moderación (Prompt Guard). Por
+  eso la búsqueda usa la API de embeddings de Google. Se mantiene el requisito del equipo: **ninguna IA en local**.
+- **Modelos de Groq verificados** (https://console.groq.com/docs/rate-limits y `/docs/structured-outputs`):
+
+| Modelo Groq | Plan gratuito (RPM / RPD / TPM / TPD) | Salida JSON |
+|---|---|---|
+| `openai/gpt-oss-120b` (**elegido**) | 30 / 1K / **8K** / 200K | Sí |
+| `openai/gpt-oss-20b` | 30 / 1K / 8K / 200K | Sí |
+| `qwen/qwen3.8-27b` | 30 / 1K / 8K / 200K | Sí |
+| `llama-3.3-70b-versatile` (el del prototipo) | **No** está en el plan gratuito (marcado «Enterprise») | — |
+
+- **Ajustes para el plan gratuito:**
+  - `GROQ_REASONING_EFFORT=low` y `GROQ_MAX_TOKENS=2048`.
+  - Una respuesta con k=8 fragmentos ocupa unos 3 000 tokens de contexto, 700 de instrucciones y hasta 2 048 de salida,
+    así que cabe en los 8 000 tokens por minuto. En la demo, **como mucho 1 o 2 preguntas por minuto**.
+  - Las respuestas ya generadas se guardan en caché en memoria.
+  - Si Groq devuelve un 429, el asistente pasa a modo de solo recuperación y lo indica.
+- **Llamada en el código** (`backend/app/ai/llm.py`):
+  `Groq(api_key).chat.completions.create(model=GROQ_MODEL, messages=[system, user], response_format={"type": "json_object"}, max_tokens=..., extra_body={"reasoning_effort": "low"})`.
+  - `reasoning_effort` va en `extra_body` porque el SDK `groq==0.13.0` no lo expone como parámetro.
+  - Probado con un cliente simulado; ⚠️ falta probarlo contra la API real.
+
+### 7.0 bis Configuración de Google (solo embeddings; la generación con Gemini es opcional)
 
 ### 7.1 Modelos (verificados en la documentación oficial el 14 nov 2026)
 
@@ -200,7 +234,7 @@ Fuentes: https://aistudio.google.com/docs/models, `/docs/models/gemini-3.8-flash
 
 | Rol | Identificador exacto | Datos verificados |
 |---|---|---|
-| **Generación (LLM)** | `gemini-3.8-flash` | Estable. Entrada: texto, imagen, vídeo, audio y PDF. Salida: texto. Contexto de 1 048 576 tokens y 65 536 de salida. Admite *structured outputs*. *Thinking* `low`/`medium`/`high` (por defecto `medium`; `minimal` devuelve error). Actualizado en septiembre de 2026. La lista de modelos lo llama *previous-generation Flash* porque ya existe la familia Gemini 4 (`gemini-4-hydrogen`, `gemini-4-argon`, `gemini-4-carbon`). |
+| Generación (**opcional**, no se usa por defecto) | `gemini-3.8-flash` | Estable. Entrada: texto, imagen, vídeo, audio y PDF. Salida: texto. Contexto de 1 048 576 tokens y 65 536 de salida. Admite *structured outputs*. *Thinking* `low`/`medium`/`high` (por defecto `medium`; `minimal` devuelve error). Actualizado en septiembre de 2026. La lista de modelos lo llama *previous-generation Flash* porque ya existe la familia Gemini 4 (`gemini-4-hydrogen`, `gemini-4-argon`, `gemini-4-carbon`). |
 | **Embeddings (recomendado)** | `gemini-embedding-001` | Estable. Solo texto. Entrada máxima de **2 048 tokens**. Dimensión configurable de 128 a 3072 (se recomiendan 768, 1536 o 3072; por defecto 3072). Admite `task_type` (`RETRIEVAL_DOCUMENT`, `RETRIEVAL_QUERY`, `QUESTION_ANSWERING`…). Una lista de textos devuelve un embedding por texto. **Solo viene normalizado a 3072 dimensiones**: con menos hay que normalizar a mano (el código ya lo hace). |
 | Embeddings (alternativa) | `gemini-embedding-2` | Estable (abril de 2026). Multimodal. Entrada máxima de **8 192 tokens**. Sin campo `task_type`: la tarea va en el texto (`task: question answering \| query: …` y `title: … \| text: …`). Varias entradas en un solo `contents` producen **un único embedding agregado**: hay que envolver cada texto en su propio `types.Content` para obtener uno por texto (el código ya lo hace). Normaliza solo en dimensiones reducidas. |
 
@@ -220,10 +254,12 @@ prompt descrito arriba. Si se usa, hay que reconstruir el índice entero y no me
 
 | Variable | Valor recomendado | Notas |
 |---|---|---|
-| `GEMINI_API_KEY` | *(tu clave)* | **Única variable secreta.** La lee `app/core/config.py` desde `.env` o desde el entorno. Se crea en https://aistudio.google.com/apikey |
-| `LLM_PROVIDER` | `gemini` | `groq` sigue siendo posible |
-| `GEMINI_MODEL` | `gemini-3.8-flash` | |
-| `GEMINI_THINKING_LEVEL` | *(vacío)* | Vacío = predeterminado del modelo (`medium`). `low` reduce latencia y coste |
+| `GROQ_API_KEY` | *(tu clave)* | **Secreta.** Para las respuestas (LLM). Se crea en https://console.groq.com/keys |
+| `LLM_PROVIDER` | `groq` | `gemini` es opcional |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Alternativas gratuitas: `openai/gpt-oss-20b`, `qwen/qwen3.8-27b` |
+| `GROQ_REASONING_EFFORT` | `low` | `low`, `medium` o `high` |
+| `GROQ_MAX_TOKENS` | `2048` | Tope de salida, por los 8 000 tokens por minuto del plan gratuito |
+| `GEMINI_API_KEY` | *(tu clave)* | **Secreta.** Solo para los embeddings (búsqueda). Se crea en https://aistudio.google.com/apikey |
 | `EMBEDDING_PROVIDER` | `google` | `local` = fastembed en CPU (384 dimensiones) |
 | `EMBEDDING_MODEL` | `gemini-embedding-001` | o `gemini-embedding-2` |
 | `EMBEDDING_DIM` | `768` | **Debe ser idéntica al construir el índice y al servir consultas** |
@@ -237,7 +273,7 @@ prompt descrito arriba. Si se usa, hay que reconstruir el índice entero y no me
   - Documentos con `RETRIEVAL_DOCUMENT`; consultas con `QUESTION_ANSWERING` (documentado para preguntas frente a
     documentos `RETRIEVAL_DOCUMENT`).
   - Todo vector se **normaliza (L2)** antes de entrar en FAISS: el producto interno equivale así al coseno.
-- **Generación** (`backend/app/ai/llm.py`):
+- **Generación con Gemini (solo si `LLM_PROVIDER=gemini`)** (`backend/app/ai/llm.py`):
   `client.models.generate_content(model="gemini-3.8-flash", contents=user, config=types.GenerateContentConfig(system_instruction=..., response_mime_type="application/json", max_output_tokens=8192[, thinking_config=ThinkingConfig(thinking_level=...)]))`
   y después se lee `resp.text`.
   - ⚠️ La documentación actual de Google muestra la **Interactions API** (`client.interactions.create(...)`,
@@ -274,11 +310,11 @@ py -3.12 -m venv .venv
 **3. Configurar las variables de entorno**
 ```powershell
 Copy-Item .env.example .env
-notepad .env        # rellenar GEMINI_API_KEY=...  (no subir .env a git; está en .gitignore)
+notepad .env        # rellenar GROQ_API_KEY=... y GEMINI_API_KEY=...  (no subir .env a git; está en .gitignore)
 ```
 Comprobar que se lee la configuración (no imprime la clave):
 ```powershell
-.\.venv\Scripts\python.exe -c "import sys; sys.path.insert(0,'backend'); from app.core.config import get_settings as g; s=g(); print(s.llm_provider, s.gemini_model, s.embedding_provider, s.embedding_model, s.embedding_dim, 'key set:', bool(s.gemini_api_key))"
+.\.venv\Scripts\python.exe -c "import sys; sys.path.insert(0,'backend'); from app.core.config import get_settings as g; s=g(); print(s.llm_provider, s.groq_model, s.embedding_provider, s.embedding_model, s.embedding_dim, 'groq key:', bool(s.groq_api_key), 'gemini key:', bool(s.gemini_api_key))"
 ```
 
 **4. Localizar los documentos originales**
@@ -300,7 +336,7 @@ Import-Csv data\metadata\psi_documents_inventory.csv | ForEach-Object {
 **5. Generar la base de datos normalizada** (segundos)
 ```powershell
 .\.venv\Scripts\python.exe pipeline\build_dataset.py
-.\.venv\Scripts\python.exe -m pytest -q backend\tests      # deben pasar los 23 tests
+.\.venv\Scripts\python.exe -m pytest -q backend\tests      # deben pasar los 29 tests
 ```
 
 **6. Extraer, limpiar y dividir en chunks**
@@ -331,7 +367,7 @@ Resultado: `data\processed\rag\index.faiss` y `manifest.json` (con el modelo y l
 .\.venv\Scripts\python.exe pipeline\rag_smoke_test.py
 ```
 
-**10. Consulta de prueba con respuesta y referencias** (1 llamada a `gemini-3.8-flash`)
+**10. Consulta de prueba con respuesta y referencias** (1 llamada a Groq `openai/gpt-oss-120b`)
 ```powershell
 .\.venv\Scripts\python.exe pipeline\rag_smoke_test.py --answer
 ```
@@ -350,7 +386,7 @@ cd frontend; npm install; npm run dev                                           
 | Parámetro | **Configuración existente (en el código)** | Recomendación | Dónde |
 |---|---|---|---|
 | Modelo de embeddings | `gemini-embedding-001` (predeterminado). Antes: `BAAI/bge-small-en-v1.5` local, nunca llegó a completarse | Mantener `gemini-embedding-001` | `.env` / `config.py` |
-| Modelo generativo | `gemini-3.8-flash` | Mantener; `GEMINI_THINKING_LEVEL=low` si la latencia importa | `.env` |
+| Modelo generativo | Groq `openai/gpt-oss-120b`, `reasoning_effort=low`, máximo 2 048 tokens de salida | Mantener (plan gratuito) | `.env` |
 | Dimensión | `768` (Google); 384 si es local | 768 | `EMBEDDING_DIM` |
 | Normalización | L2 siempre, en el cliente | — | `embeddings.py` |
 | Tamaño del chunk | **1 400 caracteres** | Mantener (muy por debajo de 2 048 tokens) | `CHUNK_CHARS` |
@@ -381,13 +417,15 @@ cd frontend; npm install; npm run dev                                           
 
 ## 10. Pruebas de validación
 
-1. `python -m pytest -q backend/tests` → **23 passed** (comprobado aquí). Incluye:
+1. `python -m pytest -q backend/tests` → **29 passed** (comprobado aquí). Incluye:
    - el formato de las peticiones a `gemini-embedding-001` y `-2`;
    - la normalización;
    - los reintentos ante 429;
    - la reanudación de `embed` tras un corte;
    - el `manifest` con la firma del modelo;
    - el rechazo de un índice construido con otra dimensión;
+   - el rechazo de un índice incompleto o con `chunks.jsonl` regenerado después de indexar;
+   - el informe con IA cuando no hay índice ni clave (se genera igualmente y lo indica);
    - el borrado de citas inventadas;
    - el modo de solo recuperación sin LLM.
 2. `rag_smoke_test.py` → integridad (vectores = chunks, firma de embeddings = `.env`, PDF presentes) y recuperación con 4
@@ -413,12 +451,29 @@ cd frontend; npm install; npm run dev                                           
 | 4 | Riesgo en Windows: lectura y escritura sin `encoding` (cp1252 por defecto) y rutas con `\` en los metadatos | Corregido: UTF-8 explícito y `as_posix()` |
 | 5 | En este equipo falta `ensurepip` (no hay `pip` en el venv del sistema) | Se usó `uv`. En el otro equipo, `py -m venv` funciona normalmente |
 | 6 | La compilación del frontend (`vite build`) es pesada en este equipo y una ejecución se interrumpió | `tsc` verificado sin errores; el build no se ha repetido aquí |
-| 7 | ⚠️ No se ha hecho ninguna llamada real a Gemini (no había clave) | Pendiente: pasos 7a, 9 y 10 |
+| 7 | ⚠️ No se ha hecho ninguna llamada real a Groq ni a Google (no había claves) | Pendiente: pasos 7a, 9 y 10 |
+| 7 bis | El plan gratuito de Groq limita a 8 000 tokens por minuto con `gpt-oss-120b` | Unas 1–2 respuestas por minuto; caché en memoria; probar las preguntas de la demo de antemano |
 | 8 | ⚠️ Máximo de textos por petición de `embed_content` no verificado | `EMBED_BATCH_SIZE` es configurable; bajarlo si la API lo rechaza |
 | 9 | Con `EMBEDDING_PROVIDER=google`, la **recuperación** también necesita la clave (se embebe la consulta). Sin clave, el asistente devuelve un error 503 claro | Por diseño |
 | 10 | El documento `PSI-23_Presentations_ISS Researchers Guide - Combustion In Reduced Gravity.pdf` es otra copia de la guía de nasa.gov | Excluido para no duplicar |
 
 ---
+
+## 11 bis. Validaciones del índice al arrancar la API (`retriever._load`)
+
+La API **no usa nunca** un índice dudoso. Devuelve un error 503 con el motivo exacto en estos casos:
+
+| Comprobación | Mensaje / acción |
+|---|---|
+| Falta `index.faiss`, `chunks.jsonl` o `manifest.json` | «RAG index not found / incomplete»: ejecutar las etapas que falten |
+| El manifest no tiene `n_chunks`, `dim`, `embedding` o `chunks_sha256_16` (builder antiguo) | Reconstruir |
+| `manifest.embedding` ≠ configuración actual (`EMBEDDING_PROVIDER/MODEL/DIM`) | Usar la misma configuración o reconstruir |
+| El SHA-256 de `chunks.jsonl` ≠ el del manifest (se regeneraron los chunks después de indexar) | `--stage embed` y `--stage index` |
+| Nº de vectores ≠ nº de líneas de chunks ≠ `n_chunks` | Índice incompleto: reconstruir |
+| Dimensión del índice ≠ `EMBEDDING_DIM` | Reconstruir |
+
+`GET /api/assistant/status` muestra `index.ready` y, si falla, `index.error` con el mismo texto. Los módulos
+**Reports** y **Assistant** siguen funcionando sin índice: el informe se genera y dice que falta la discusión con IA.
 
 ## 12. Tareas pendientes, en orden recomendado
 
@@ -440,7 +495,9 @@ cd frontend; npm install; npm run dev                                           
    demo hay que, o bien reconstruirlo en el servidor (requiere los PDF y la clave), o bien copiar `chunks.jsonl`,
    `index.faiss` y `manifest.json` (unos 10–20 MB estimados con 768 dimensiones). Si se decide compartirlo, quitar
    esas líneas de `.gitignore` de forma consciente.
-10. Mantener `GEMINI_API_KEY` solo en `.env` o en las variables del sistema o del servidor de despliegue; nunca en el
+10. En el ordenador potente: `cd frontend; npm run build` (no se ha ejecutado en este equipo por consumo de memoria;
+    `tsc --noEmit` sí pasa sin errores).
+11. Mantener `GEMINI_API_KEY` solo en `.env` o en las variables del sistema o del servidor de despliegue; nunca en el
     código ni en el repositorio.
 
 ---

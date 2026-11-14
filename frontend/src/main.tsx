@@ -11,6 +11,8 @@ import NotFound from "@/pages/NotFound";
 import { Loading } from "@/components/ui/primitives";
 const Compare = lazy(() => import("@/pages/Compare"));
 const Assistant = lazy(() => import("@/pages/Assistant"));
+const Safety = lazy(() => import("@/pages/Safety"));
+const Reports = lazy(() => import("@/pages/Reports"));
 
 const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 5 * 60_000, retry: 1, refetchOnWindowFocus: false } } });
 
@@ -26,6 +28,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/experiments/:accession" element={<ExperimentDetail />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/assistant" element={<Assistant />} />
+            <Route path="/safety" element={<Safety />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

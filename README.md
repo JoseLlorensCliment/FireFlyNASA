@@ -19,9 +19,9 @@ quality, so researchers can compare experiments without silently mixing incompat
 | Dashboard | ✅ Done: real statistics only |
 | Experiment explorer (search, filters, sort, detail page) | ✅ Done |
 | Scientific comparator (rigor warnings, matrix, envelopes, atmosphere map) | ✅ Done |
-| AI assistant (RAG with verifiable citations) | ✅ Code done · ⏳ **index not built yet** — to be built on another machine with Gemini, see [RAG_HANDOFF.md](RAG_HANDOFF.md) |
-| Safety insights (descriptive, no arbitrary risk scores) | ⏳ Priority 3 |
-| Reports | ⏳ Priority 3 |
+| AI assistant (RAG with verifiable citations) | ✅ Code done · ⏳ **index not built yet** — to be built on another machine (Google embeddings API), see [RAG_HANDOFF.md](RAG_HANDOFF.md) |
+| Safety insights: atmosphere coverage map, FLEX suppression, Saffire-II µg vs 1 g, BASS-II products, transparent relevance ranking (no risk scores) | ✅ Done |
+| Reports: question + investigations → Markdown/PDF with data, comparison, limitations, references (+ optional cited AI discussion) | ✅ Done |
 
 ## Quick start
 
@@ -29,11 +29,11 @@ Requirements: **Python 3.11+**, **Node.js 20+**, `make` (optional).
 
 ```bash
 git clone <repo> flame-intelligence && cd flame-intelligence
-cp .env.example .env            # add GEMINI_API_KEY for the AI assistant
+cp .env.example .env            # add GROQ_API_KEY (answers) and GEMINI_API_KEY (search embeddings)
 make setup                      # venv + Python deps + npm install
 make build-data                 # builds data/processed/flame.db from the snapshot in data/raw
 make data-docs                  # optional: ~70 PSI PDFs (~175 MB) for the AI assistant
-make rag                        # builds the RAG index with Gemini embeddings (see RAG_HANDOFF.md)
+make rag                        # builds the RAG index with Google embeddings (see RAG_HANDOFF.md)
 ```
 
 Run in two terminals:
@@ -93,6 +93,8 @@ frontend/src/             React + TypeScript + Vite + Tailwind + Plotly
 | `GET /api/compare?ids=PSI-69,PSI-25` | Comparison: attributes, harmonized variables with comparability status, warnings, points |
 | `POST /api/assistant/ask` `{question, accessions?}` | RAG answer with [S#] citations, evidence vs interpretation, limitations |
 | `GET /api/assistant/status` | LLM / index readiness |
+| `GET /api/insights/{atmospheres,flex-suppression,saffire-gravity,bass2-products,relevance}` | Descriptive safety analyses, each with `method` and `limitations` |
+| `POST /api/reports` `{question, accessions[1-4], include_ai}` | Structured report + Markdown |
 | `GET /api/documents/{chunk_id}` | Local copy of a cited NASA PDF (open at `#page=N`) |
 | `GET /api/variables`, `GET /api/scenarios` | Harmonized variable dictionary; exploration-atmosphere scenarios |
 
@@ -137,13 +139,14 @@ Each investigation page links to its PSI landing page and dataset DOI.
 4. **Retrieval.** FAISS cosine search with at most 3 chunks per document. When the question names investigations
    (e.g. "FLEX vs BASS"), each of them is guaranteed to be represented. An optional scope limits the search to chosen
    investigations.
-5. **Generation.** Gemini `gemini-3.8-flash` (default; Groq is kept as a legacy option), JSON output. The system prompt requires a
+5. **Generation.** Groq `openai/gpt-oss-120b` (free plan, low reasoning effort, JSON output; Gemini optional). The system prompt requires a
    citation on every factual sentence, a separation between *evidence* and *interpretation*, an explicit
    *insufficient evidence* flag and a list of limitations.
 6. **Verification.** Citations to non-existent sources are stripped and reported, and answers without valid citations
    are flagged. Each cited source links to the PDF page or the PSI landing page.
 7. **Graceful degradation.** Without a key for the generative model, the assistant runs in *retrieval-only* mode and
    shows the most relevant NASA passages. Retrieval with Google embeddings still needs `GEMINI_API_KEY`.
+   Groq offers no embedding models, which is why search uses Google's embeddings API.
 
 Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md)**.
 
@@ -152,8 +155,8 @@ Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md
 - **Development assistance:** The project scaffolding, data pipeline, backend and frontend code were written with the help
   of an AI coding assistant (Anthropic Claude, via Claude Code), under the team's direction and review. The team owns the
   concept and design decisions.
-- **In the product:** The AI assistant uses Google **Gemini** (`gemini-3.8-flash` for answers, `gemini-embedding-001`
-  for retrieval). Answers are grounded in retrieved NASA documents and must cite them.
+- **In the product:** answers are written by **Groq** (`openai/gpt-oss-120b`); document search uses Google's
+  `gemini-embedding-001` embeddings API. No AI model runs locally. Answers are grounded in retrieved NASA documents and must cite them.
 - **Data:** No data in the app is AI-generated. All values come from NASA PSI files. The curated classification in
   `curation.json` was drafted with AI assistance from the challenge text and PSI objectives, then reviewed by the team.
 
@@ -167,7 +170,18 @@ Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md
 - Fuel-family normalization is pattern-based. Samples it cannot classify confidently are shown as *unclassified*.
 - The PSI API is undocumented and slow; `fetch_psi.py` may need adapting if it changes.
 
+## Heavy tasks (run on a capable machine, not on the low-spec dev laptop)
+
+| Task | Command | Why it is deferred |
+|---|---|---|
+| Build the RAG index (PDF extraction, Google embeddings, FAISS) | see [RAG_HANDOFF.md](RAG_HANDOFF.md) §8 | ~2,300 PDF pages + API batches |
+| Production frontend build | `cd frontend && npm run build` | Vite/Rollup bundling of Plotly is memory-hungry |
+| Re-download PSI PDFs | `python pipeline/fetch_psi.py --docs` | ~175 MB from a slow server |
+
 ## Team docs
 
 - [docs/00-analisis-inicial.md](docs/00-analisis-inicial.md): initial analysis (in Spanish) covering the challenge,
   datasets, architecture and plan.
+- [docs/01-jury-guide.md](docs/01-jury-guide.md): what we solve, NASA data, processing, AI, value, limitations and
+  demo script (English).
+- [RAG_HANDOFF.md](RAG_HANDOFF.md): status and rebuild instructions for the AI assistant index (Spanish).

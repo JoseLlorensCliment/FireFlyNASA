@@ -138,3 +138,37 @@ def test_smoke_test_script_detects_missing_index_and_validates_built_one(tmp_pat
     retriever._load.cache_clear()
     assert any("embedding" in e for e in smoke.check_index())
     retriever._load.cache_clear()
+
+
+def test_retriever_rejects_tampered_or_incomplete_index(tmp_path, monkeypatch, fake_google):
+    import build_rag_index as b
+    from app.ai import retriever
+
+    settings = _settings(data_dir=tmp_path)
+    fake_google(settings, FakeModels())
+    monkeypatch.setattr(b, "get_settings", lambda: settings)
+    monkeypatch.setattr(retriever, "get_settings", lambda: settings)
+    monkeypatch.setattr(b, "signature", lambda: {"provider": "google", "model": "gemini-embedding-001", "dim": 8})
+    monkeypatch.setattr(b, "DOCS", tmp_path / "x")
+    monkeypatch.setattr(b, "NASA_DOCS", tmp_path / "x")
+    out = tmp_path / "processed" / "rag"
+    b.stage_chunks(out, limit=6)
+    b.stage_embed(out)
+    b.stage_index(out)
+
+    def load_error():
+        retriever._load.cache_clear()
+        try:
+            retriever._load()
+            return None
+        except RuntimeError as exc:
+            return str(exc)
+        finally:
+            retriever._load.cache_clear()
+
+    assert load_error() is None
+    with (out / "chunks.jsonl").open("a", encoding="utf-8") as fh:   # chunks regenerated after indexing
+        fh.write('{"id": 99, "text": "x"}\n')
+    assert "does not match" in load_error()
+    (out / "chunks.jsonl").unlink()
+    assert "incomplete" in load_error()
