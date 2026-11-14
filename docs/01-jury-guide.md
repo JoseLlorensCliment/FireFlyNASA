@@ -50,7 +50,8 @@ Every number in the app links back to its PSI table cell, investigation page and
 - **RAG pipeline:**
   - **Corpus:** NASA PDFs, PSI records and deterministic summaries of the data tables.
   - **Chunking:** page-aware chunks with metadata (title, investigation, page, URL).
-  - **Embeddings:** Dual-mode support — local `fastembed` (`BAAI/bge-small-en-v1.5`, 384 dims, fast CPU execution with zero quota limits) or Google `gemini-embedding-001`.
+  - **Embeddings:** `fastembed` `BAAI/bge-small-en-v1.5` (384 dimensions; 4,392 pre-embedded chunks shipped with the
+    repository; only the user's question is embedded at query time). Google `gemini-embedding-001` is supported as an alternative.
   - **Retrieval:** FAISS, with diversity rules, and every investigation named in the question is guaranteed to be
     covered.
   - **Answers:** written by **Groq `openai/gpt-oss-120b`** (free plan, low latency) or Google Gemini in structured JSON.
@@ -101,7 +102,7 @@ per-row O₂ and pressure in that region.** This is exactly the gap that future 
 
 - **Code:** written with the help of an AI coding assistant (Anthropic Claude via Claude Code), under the team's
   direction and review.
-- **Product:** Groq (`openai/gpt-oss-120b`) writes the assistant's answers; Google's `gemini-embedding-001` API
-  produces the search embeddings.
+- **Product:** Groq (`openai/gpt-oss-120b`) writes the assistant's answers; the open `BAAI/bge-small-en-v1.5`
+  embedding model (via fastembed) powers document search.
 - **Data:** no data is AI-generated.
 - **Branding:** no NASA logos or branding are used.

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     gemini_thinking_level: str | None = None
 
     # --- Embeddings (retrieval) -------------------------------------------------
-    embedding_provider: str = "google"            # google | local
+    embedding_provider: str = "local"             # local (default: fastembed, matches the committed index) | google
     embedding_model: str = "gemini-embedding-001"  # google: gemini-embedding-001 | gemini-embedding-2
     embedding_dim: int = 768                      # google only: 128-3072 (recommended 768/1536/3072)
     local_embedding_model: str = "BAAI/bge-small-en-v1.5"  # used when embedding_provider=local (fixed 384 dims)

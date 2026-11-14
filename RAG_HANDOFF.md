@@ -1,37 +1,38 @@
-# RAG_HANDOFF — Traspaso de la construcción del RAG a otro ordenador
+# RAG_HANDOFF — Estado y reconstrucción del RAG
 
 > **Proyecto:** Flame Intelligence (NASA Space Apps 2026 · *Flame in Freefall*)
-> **Fecha del traspaso:** 14 nov 2026
-> **Motivo:** el equipo actual (AMD Athlon antiguo, 8 GB de RAM) no es adecuado para el procesamiento pesado. La
-> extracción del corpus, los embeddings y el índice FAISS se harán en otro ordenador. **Toda la IA va por API, ninguna en
-> local:** Groq redacta las respuestas y la API de embeddings de Google genera los vectores de búsqueda.
-> **Para la IA que continúe:** aquí está todo lo que se ha hecho, verificado y decidido. Lo que **no** está verificado
-> aparece marcado como ⚠️ *no probado*. No hace falta volver a investigar nada de lo que figura en este documento.
+> **Última actualización:** 14 nov 2026 (tarde) — **el índice RAG ya está construido y en el repositorio.**
+> **Configuración vigente (decisión del equipo):**
+> - **Respuestas:** Groq `openai/gpt-oss-120b` (API, plan gratuito).
+> - **Búsqueda:** fastembed `BAAI/bge-small-en-v1.5`, ejecutado **en el ordenador que corre el backend**. Solo
+>   convierte cada pregunta (una frase); los documentos ya están convertidos e incluidos en el repositorio.
+>
+> **Para la IA que continúe:** este documento recoge lo que se ha hecho, verificado y decidido. Lo que **no** está
+> verificado aparece marcado como ⚠️. Las secciones §7.0 bis a §7.3 (Google) y §8 (reconstrucción) solo hacen falta
+> para **reconstruir** el índice o para cambiar a los embeddings de Google.
 
 ---
 
-## 0. Resumen en 10 líneas
+## 0. Resumen
 
-1. **No existe todavía ningún índice RAG ni corpus parcial.** `data/processed/rag/` no existe: el único intento de
-   construirlo (embeddings locales en CPU) se interrumpió dos veces antes de escribir nada en disco.
-2. Los **documentos NASA originales ya están descargados**: 79 PDF (185,8 MB), con checksums en
-   `data/metadata/psi_documents_inventory.csv`.
-3. **El código del RAG está terminado y probado con tests** (29 tests, sin red): extracción, chunking, embeddings con
-   Google, FAISS, recuperación, generación con citas (Groq) y validación.
-4. La construcción tiene **3 etapas reanudables**: `chunks → embed → index`. La etapa `embed` guarda un punto de control
-   por lote y se puede interrumpir y relanzar.
-5. Modelo generativo (redacta las respuestas del chatbot y los informes): **Groq `openai/gpt-oss-120b`**, del plan
-   gratuito y con salida JSON (verificado en la documentación de Groq el 14 nov 2026). Decisión del equipo: Groq
-   porque es gratuito.
-6. Modelo de embeddings: **`gemini-embedding-001`** a **768 dimensiones** (recomendación). Alternativa:
-   `gemini-embedding-2`.
-7. Única variable secreta: **`GEMINI_API_KEY`**, en `.env`. No hay ninguna clave en el repositorio.
-8. Se han verificado las dependencias para Windows: la resolución con `uv` para `win_amd64` / Python 3.12 funciona.
-   `faiss-cpu` tiene wheel para Windows.
-9. **Pendiente en el otro ordenador:** obtener los PDF → `build_dataset` → `chunks` → `embed` → `index` →
-   `rag_smoke_test`.
-10. ⚠️ **No probado con las API reales:** no se ha hecho ninguna llamada real a Groq ni a Google (no había claves en
-    este equipo). El código se ha probado con clientes simulados que verifican los parámetros enviados.
+1. **El índice RAG está hecho y versionado en git:** `data/processed/rag/{index.faiss, chunks.jsonl, manifest.json}`.
+   - 4 392 fragmentos, 384 dimensiones, `BAAI/bge-small-en-v1.5`, construido por un compañero el 14 nov (commit
+     `93d4044`).
+   - Cubre 69 de los 71 PDF previstos más los registros y tablas del PSI. Los 2 que faltan son pósteres de ACME que
+     son solo imagen (0 palabras): es correcto que no se indexen.
+2. **Los 79 PDF** (70 del PSI y 9 de nasa.gov) y **`flame.db`** también están en git (commit `460f04c`). Coinciden con
+   los SHA-256 de `data/metadata/psi_documents_inventory.csv` (verificado el 14 nov).
+3. **Claves necesarias:** solo `GROQ_API_KEY`, para redactar las respuestas. `GEMINI_API_KEY` solo hace falta si se
+   cambia a los embeddings de Google.
+4. **Al primer uso del chatbot,** fastembed descarga el modelo (unos 65 MB, necesita internet una vez) en
+   `data/processed/models/`, que está fuera de git. Después, cada pregunta solo se convierte en un vector (trabajo
+   mínimo de CPU).
+5. **La API comprueba al arrancar** que el índice coincide con la configuración (`EMBEDDING_PROVIDER=local`, el modelo y
+   384 dimensiones). Si alguien cambia a `google` sin reconstruir el índice, la API lo rechaza con un mensaje claro
+   (§11 bis).
+6. **Código probado** con 32 tests sin red (clientes simulados).
+7. ⚠️ **Aún no probado de principio a fin:** una pregunta real con fastembed y Groq. En el equipo de desarrollo (poco
+   potente) solo se ha verificado la estructura del índice, sin cargar el modelo. Es el primer paso pendiente (§12).
 
 ---
 
@@ -39,24 +40,21 @@
 
 | Elemento | Estado | Ubicación |
 |---|---|---|
-| Metadatos PSI (24 investigaciones) | ✅ Descargados y en git | `data/raw/psi/investigations/*.json`, `data/raw/psi/combustion_investigations_search.json` |
-| Tablas experimentales PSI (22 CSV) | ✅ Descargadas y en git | `data/raw/psi/experimental_tables/` |
-| Base SQLite normalizada | ✅ Se regenera en segundos (no va en git) | `data/processed/flame.db` ← `pipeline/build_dataset.py` |
-| PDF del PSI (70 ficheros, ~175 MB) | ✅ Descargados en ESTE equipo, **fuera de git** | `data/raw/psi/documents/PSI-*/` |
-| PDF de NASA GRC y guía ISS (9 ficheros, 3,2 MB) | ✅ Descargados y en git | `data/raw/nasa_docs/` |
-| Inventario con SHA-256 de los 79 PDF | ✅ Creado y en git | `data/metadata/psi_documents_inventory.csv` |
-| Texto extraído / chunks (`chunks.jsonl`) | ❌ **No generado** | (se creará en `data/processed/rag/`) |
-| Embeddings | ❌ **No generados** (ni locales ni de Google) | (se crearán en `data/processed/rag/embed_cache/`) |
-| Índice FAISS | ❌ **No existe** | (se creará en `data/processed/rag/index.faiss`) |
-| Código de construcción (3 etapas) | ✅ Escrito y probado con tests simulados | `pipeline/build_rag_index.py` |
-| Código de servicio (retriever, LLM, citas) | ✅ Escrito y probado con tests simulados | `backend/app/ai/` |
-| Script de validación | ✅ Escrito y probado con un índice simulado | `pipeline/rag_smoke_test.py` |
-| Llamadas reales a Groq y a Google embeddings | ⚠️ **No probadas** (no había claves) | — |
-| Índice construido por un compañero con **fastembed local** (copiado a este equipo el 14 nov, `data/processed/rag/`, fuera de git) | ✅ **Estructura verificada aquí** (sin cargar modelos ni hacer consultas): 1 742 vectores de 384 dimensiones (`BAAI/bge-small-en-v1.5`), normalizados, `IndexFlatIP`; la huella de `chunks.jsonl` coincide con el manifest; 0 errores en `rag_smoke_test.check_index()`. ⚠️ **Corpus parcial:** solo indexa **27 PDF** (18 de PSI-10 y PSI-23, y los 9 de nasa.gov) más los registros y tablas del PSI, frente a los **71 PDF previstos**. ⚠️ Hay además una caché de Google **a medias** (17 de 35 lotes de `gemini-embedding-001`) | Para usarlo tal cual: `EMBEDDING_PROVIDER=local` (carga un modelo de unos 65 MB al buscar). Para completarlo: recuperar los PDF (fila siguiente) y relanzar `--stage chunks`, `embed` e `index` |
-| **PDF del PSI en este equipo** | ❌ **Al copiar la carpeta `data` se perdieron 49 de los 70 PDF del PSI** (quedan 21, solo de PSI-10 y PSI-23). No están en la papelera ni en git | Recuperar con `python pipeline/fetch_psi.py --docs` (unos 175 MB; servidor lento, de 30 a 90 min) o copiándolos de una copia completa. Verificar con el comando del §8, paso 4 |
+| Metadatos PSI (24 investigaciones) y 22 CSV | ✅ En git | `data/raw/psi/investigations/`, `data/raw/psi/experimental_tables/` |
+| Base SQLite normalizada | ✅ En git; se puede regenerar con `pipeline/build_dataset.py` | `data/processed/flame.db` |
+| PDF del PSI (70) y de nasa.gov (9) | ✅ En git; hashes verificados | `data/raw/psi/documents/PSI-*/`, `data/raw/nasa_docs/` |
+| Inventario con SHA-256 de los 79 PDF | ✅ En git | `data/metadata/psi_documents_inventory.csv` |
+| Chunks | ✅ 4 392: 4 021 de PDF del PSI, 220 de nasa.gov, 101 de registros PSI y 50 de tablas | `data/processed/rag/chunks.jsonl` |
+| Índice FAISS | ✅ `IndexFlatIP`, 4 392 × 384, vectores normalizados; 0 errores en `rag_smoke_test.check_index()` | `data/processed/rag/index.faiss` |
+| Manifest | ✅ `embedding = {local, BAAI/bge-small-en-v1.5, 384}`; chunking 1 400 / 250 / 200 | `data/processed/rag/manifest.json` |
+| Caché de lotes de embeddings | Fuera de git (temporal) | `data/processed/rag/embed_cache/` |
+| Modelo fastembed | Se descarga al primer uso; fuera de git | `data/processed/models/` |
+| Código de construcción (3 etapas) y de servicio | ✅ Probado con tests | `pipeline/build_rag_index.py`, `backend/app/ai/` |
+| Pregunta real de principio a fin (fastembed + Groq) | ⚠️ **No probada** | §12, paso 1 |
 
-**Qué no hay que repetir:** la descarga de metadatos y CSV, la normalización (el código), el diseño de chunking y
-citas, la investigación de los modelos de Groq y Google, ni la fijación de versiones de las dependencias.
+**Historial:**
+- Un primer índice parcial de 1 742 fragmentos y 27 PDF quedó **sustituido** por el actual de 4 392.
+- La caché de Google a medias (17 de 35 lotes) ya no se usa.
 
 ---
 
@@ -141,11 +139,10 @@ El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
   (`https://psi.nasa.gov/physci/repo/data/investigations/PSI-n`); las de los documentos de nasa.gov, al PDF original.
   Además, la API sirve la copia local en `/api/documents/{chunk_id}#page=N`.
 
-### Cómo obtener los PDF del PSI en el otro ordenador (no están en git)
+### Cómo obtener los PDF del PSI
 
-- **Opción A (recomendada si hay un medio de copia):** comprimir `data/raw/psi/documents/` en este equipo, copiarlo a la
-  misma ruta del repositorio en el otro y verificar los hashes (ver el §8, paso 4).
-- **Opción B:** volver a descargarlos con `python pipeline/fetch_psi.py --docs`. El script es idempotente y se salta lo
+- **Ya están en git** desde el commit `460f04c`: basta con `git clone` o `git pull`.
+- Si alguna vez se quitan del repositorio:** volver a descargarlos con `python pipeline/fetch_psi.py --docs`. El script es idempotente y se salta lo
   que ya existe. El servidor del PSI es **muy lento**: entre 1 y 300 s por ficha y a veces corta respuestas grandes.
   Puede tardar entre 30 y 90 minutos. Las URL de descarga son URL prefirmadas de S3 que el script obtiene él mismo.
 
@@ -195,18 +192,21 @@ El inventario completo, con ruta, tamaño, SHA-256 y si se indexa o no, está en
 
 ---
 
-## 7. Configuración de la IA: Groq (respuestas) + Google (búsqueda)
+## 7. Configuración de la IA: Groq (respuestas) + fastembed (búsqueda)
 
 ### 7.0 Qué hace cada modelo (decisión del equipo, 14 nov 2026)
 
 | Pieza | Qué hace | Servicio | Clave |
 |---|---|---|---|
 | **LLM** | Redacta las respuestas del chatbot y la discusión de los informes, a partir de los fragmentos encontrados y con citas `[S#]` | **Groq**, `openai/gpt-oss-120b` | `GROQ_API_KEY` |
-| **Embeddings** | Convierte cada fragmento de los PDF y cada pregunta en un vector para **buscar** en FAISS | **API de Google**, `gemini-embedding-001` | `GEMINI_API_KEY` |
+| **Embeddings** | Convierte cada fragmento de los PDF (ya hecho) y cada pregunta en un vector para **buscar** en FAISS | **fastembed** `BAAI/bge-small-en-v1.5` (384 dimensiones), ejecutado en el ordenador del backend | Ninguna |
+| Embeddings (alternativa) | Igual, mediante API | Google `gemini-embedding-001` (§7.0 bis); exige **reconstruir** el índice | `GEMINI_API_KEY` |
 
 - **Groq no ofrece modelos de embeddings.** La lista de modelos de Groq (https://console.groq.com/docs/models,
-  consultada el 14 nov 2026) solo contiene modelos de texto, voz (Whisper, Orpheus) y moderación (Prompt Guard). Por
-  eso la búsqueda usa la API de embeddings de Google. Se mantiene el requisito del equipo: **ninguna IA en local**.
+  consultada el 14 nov 2026) solo contiene modelos de texto, voz (Whisper, Orpheus) y moderación (Prompt Guard).
+  Primero se planteó usar la API de Google para la búsqueda. El equipo construyó el índice con **fastembed** (sin cuota
+  ni clave) y lo subió a git, así que **la configuración por defecto pasa a ser `EMBEDDING_PROVIDER=local`**. El coste
+  en uso es vectorizar cada pregunta (una frase) en el ordenador del backend.
 - **Modelos de Groq verificados** (https://console.groq.com/docs/rate-limits y `/docs/structured-outputs`):
 
 | Modelo Groq | Plan gratuito (RPM / RPD / TPM / TPD) | Salida JSON |
@@ -261,10 +261,10 @@ prompt descrito arriba. Si se usa, hay que reconstruir el índice entero y no me
 | `GROQ_MODEL` | `openai/gpt-oss-120b` | Alternativas gratuitas: `openai/gpt-oss-20b`, `qwen/qwen3.8-27b` |
 | `GROQ_REASONING_EFFORT` | `low` | `low`, `medium` o `high` |
 | `GROQ_MAX_TOKENS` | `2048` | Tope de salida, por los 8 000 tokens por minuto del plan gratuito |
-| `GEMINI_API_KEY` | *(tu clave)* | **Secreta.** Solo para los embeddings (búsqueda). Se crea en https://aistudio.google.com/apikey |
-| `EMBEDDING_PROVIDER` | `google` | `local` = fastembed en CPU (384 dimensiones) |
-| `EMBEDDING_MODEL` | `gemini-embedding-001` | o `gemini-embedding-2` |
-| `EMBEDDING_DIM` | `768` | **Debe ser idéntica al construir el índice y al servir consultas** |
+| `GEMINI_API_KEY` | *(vacía)* | Solo si `EMBEDDING_PROVIDER=google` o `LLM_PROVIDER=gemini`. Se crea en https://aistudio.google.com/apikey |
+| `EMBEDDING_PROVIDER` | **`local`** (predeterminado; coincide con el índice de git) | `google` exige reconstruir el índice |
+| `EMBEDDING_MODEL` | `gemini-embedding-001` | Solo con `google`. Con `local` se usa `LOCAL_EMBEDDING_MODEL=BAAI/bge-small-en-v1.5` (384 dimensiones fijas) |
+| `EMBEDDING_DIM` | `768` | Solo con `google`. **Debe ser idéntica al construir el índice y al servir consultas** |
 | `EMBED_BATCH_SIZE` | `50` | ⚠️ El máximo de textos por petición **no se ha verificado** en la documentación. Si la API rechaza el lote, bajarlo (p. ej. a 20). Al cambiarlo se usa otra carpeta de caché |
 | `EMBED_MAX_RETRIES` | `8` | Reintentos con espera exponencial ante 429, 500, 502, 503, 504 o RESOURCE_EXHAUSTED |
 
@@ -291,6 +291,10 @@ prompt descrito arriba. Si se usa, hay que reconstruir el índice entero y no me
 ---
 
 ## 8. Reconstrucción paso a paso (Windows PowerShell)
+
+> **Ya no es necesaria para usar la app:** el índice está en git. Sigue estos pasos solo para **reconstruirlo**: al
+> añadir o cambiar documentos, o para cambiar a los embeddings de Google (`EMBEDDING_PROVIDER=google`). Con
+> fastembed, el paso 7a no hace llamadas a ninguna API y no necesita `GEMINI_API_KEY`.
 
 > Todos los comandos se ejecutan **desde la raíz del repositorio**. Se usa `.\.venv\Scripts\python.exe` directamente,
 > así que no hace falta activar el entorno virtual ni cambiar la política de ejecución de PowerShell.
@@ -387,9 +391,9 @@ cd frontend; npm install; npm run dev                                           
 
 | Parámetro | **Configuración existente (en el código)** | Recomendación | Dónde |
 |---|---|---|---|
-| Modelo de embeddings | `gemini-embedding-001` (predeterminado). Antes: `BAAI/bge-small-en-v1.5` local, nunca llegó a completarse | Mantener `gemini-embedding-001` | `.env` / `config.py` |
+| Modelo de embeddings | **`BAAI/bge-small-en-v1.5` con fastembed (predeterminado; es con el que está construido el índice de git)**. Alternativa: `gemini-embedding-001` | Mantener fastembed | `.env` / `config.py` |
 | Modelo generativo | Groq `openai/gpt-oss-120b`, `reasoning_effort=low`, máximo 2 048 tokens de salida | Mantener (plan gratuito) | `.env` |
-| Dimensión | `768` (Google); 384 si es local | 768 | `EMBEDDING_DIM` |
+| Dimensión | **384** (fastembed); 768 si se usa Google | 384 | manifest / `EMBEDDING_DIM` |
 | Normalización | L2 siempre, en el cliente | — | `embeddings.py` |
 | Tamaño del chunk | **1 400 caracteres** | Mantener (muy por debajo de 2 048 tokens) | `CHUNK_CHARS` |
 | Solapamiento | **250 caracteres** | Mantener | `OVERLAP` |
@@ -399,7 +403,7 @@ cd frontend; npm install; npm run dev                                           
 | Recuperación | Top 400 candidatos → filtro por ámbito opcional → **cobertura garantizada** de cada investigación mencionada en la pregunta (p. ej. «FLEX vs BASS») → **máximo 3 chunks por documento** | — | `retriever.search` |
 | Resultados que se recuperan (k) | **8** por defecto (la API admite de 3 a 14) | 8 | `AskRequest.k` |
 | Validación de la respuesta | Se eliminan y se avisan las citas `[S#]` inexistentes; se marca la respuesta sin citas válidas | — | `assistant.py` |
-| Nº total de chunks | **Desconocido** (151 de la base de datos, contados, más los de 2 323 páginas de PDF) | Estimación sin verificar: unos 3 000–6 000 | se sabrá en el paso 6 |
+| Nº total de chunks | **4 392** (verificado: 4 021 PSI, 220 NASA, 101 registros, 50 tablas) | — | `manifest.json` |
 
 **Metadatos de cada chunk** (`chunks.jsonl`), necesarios para citar:
 
@@ -479,49 +483,38 @@ La API **no usa nunca** un índice dudoso. Devuelve un error 503 con el motivo e
 
 ## 12. Tareas pendientes, en orden recomendado
 
-1. **Subir a GitHub desde este equipo** (no hay repositorio git todavía):
-   ```bash
-   git init && git add . && git status     # revisar: no deben aparecer .env, data/raw/psi/documents, data/processed
-   git commit -m "Flame Intelligence: data pipeline, app, RAG code and handoff"
-   git remote add origin <URL> && git push -u origin main
+1. **Probar una pregunta real de principio a fin**, en un ordenador con recursos normales. Pon `GROQ_API_KEY` en `.env`
+   y ejecuta:
+   ```powershell
+   .\.venv\Scripts\python.exe pipeline\rag_smoke_test.py --answer
    ```
-2. Trasladar `data/raw/psi/documents/` al otro equipo (opción A del §4), o volver a descargarlo allí (opción B).
-3. En el otro equipo: §8, pasos 1 a 5.
-4. Paso 6 (`chunks`). Anotar el número de chunks en este documento (§9).
-5. Paso 7a (prueba con 20 chunks) para validar la clave, el modelo, el tamaño de lote y la cuota.
-6. Pasos 7b y 8 (embeddings completos y FAISS).
-7. Pasos 9 y 10 (validación). Si `--answer` falla en la llamada de generación, ver el §7.3 (alternativa con la
-   Interactions API).
-8. Revisión manual de citas (§10, punto 4) y actualización de este documento con los resultados reales.
-9. **Decidir cómo se distribuye el índice:** no va en git (`data/processed/rag/` está en `.gitignore`). Para desplegar la
-   demo hay que, o bien reconstruirlo en el servidor (requiere los PDF y la clave), o bien copiar `chunks.jsonl`,
-   `index.faiss` y `manifest.json` (unos 10–20 MB estimados con 768 dimensiones). Si se decide compartirlo, quitar
-   esas líneas de `.gitignore` de forma consciente.
-10. En el ordenador potente: `cd frontend; npm run build` (no se ha ejecutado en este equipo por consumo de memoria;
-    `tsc --noEmit` sí pasa sin errores).
-11. Mantener `GEMINI_API_KEY` solo en `.env` o en las variables del sistema o del servidor de despliegue; nunca en el
-    código ni en el repositorio.
+   Debe terminar en `RESULT: PASS`. La primera vez descarga el modelo fastembed (unos 65 MB).
+2. Revisión manual de citas (§10, punto 4): hacer las 5 preguntas de ejemplo en `/assistant` y abrir 2 o 3 citas.
+3. Comprobar en la demo el límite de Groq (8 000 tokens por minuto con `gpt-oss-120b`): como mucho 1 o 2 preguntas por
+   minuto. Hacer antes las preguntas que se vayan a enseñar, para que queden en caché.
+4. `cd frontend; npm run build` en un ordenador con memoria suficiente (aquí solo se ha ejecutado `tsc --noEmit`, sin
+   errores).
+5. Si se añaden documentos: §8, pasos 6 a 10, y volver a subir los 3 ficheros de `data/processed/rag/`.
+6. Mantener `GROQ_API_KEY` (y `GEMINI_API_KEY`, si se usa) solo en `.env` o en las variables del servidor; nunca en el
+   repositorio.
 
 ---
 
-## 13. Preparación para GitHub (comprobado)
+## 13. Repositorio GitHub
 
-- Simulación de `git add` con un repositorio temporal: **119 ficheros, 6,9 MB**, sin `.env`, PDF del PSI, base de datos, índices ni modelos; sin patrones de clave de Google o Groq en el código.
-- `.gitignore` excluye:
-  - `.env` y `.env.*` (salvo `.env.example`), `*.key` y `credentials*.json`;
+- **Ahora sí se suben:**
+  - los 79 PDF (~186 MB);
+  - `data/processed/flame.db`;
+  - `data/processed/rag/{index.faiss, chunks.jsonl, manifest.json}` (~13 MB).
+
+  Es una decisión del equipo para que la app funcione al clonar, sin reconstruir nada.
+- **Siguen fuera de git:**
+  - `.env` y `.env.*` (salvo `.env.example`), claves y credenciales;
   - `.venv/`, `node_modules/` y `frontend/dist/`;
-  - `data/raw/psi/documents/` (175 MB);
-  - `data/processed/flame.db`, `data/processed/rag/`, `rag_*/`, `*.faiss`, `*.npy` y `data/processed/models/`;
-  - `.claude/`, configuración de editores y logs.
-- **Lo que sí se sube:**
-  - todo el código y los tests;
-  - `.env.example`;
-  - los datos PSI pequeños: metadatos, 22 CSV, ~3 MB;
-  - los 9 PDF de nasa.gov (3,2 MB);
-  - `curation.json` y el inventario con hashes.
-- **No hay claves en el repositorio.** El código las lee de `GEMINI_API_KEY` y `GROQ_API_KEY` con
-  `pydantic-settings`. Comprobado: no existe ningún fichero `.env` en este equipo.
-- **Las rutas no dependen de este ordenador:**
-  - todas se calculan con `Path(__file__)`, relativas a la raíz del repositorio;
-  - los metadatos usan rutas POSIX relativas;
-  - la única excepción es `.claude/launch.json`, que contiene rutas de este equipo y está excluido de git.
+  - `data/processed/models/` (modelo fastembed, se descarga solo) y `data/processed/rag/embed_cache/`;
+  - `*.npy`, `*.zip` y `*.tsbuildinfo`;
+  - `.claude/`.
+- `.gitattributes` mantiene los saltos de línea LF en el repositorio, aunque se haga commit desde Windows, y trata
+  como binarios los PDF, `.db`, `.faiss` y `.zip`.
+- **No hay claves en el repositorio.** Las rutas son relativas a la raíz del repositorio (`Path(__file__)` y rutas
+  POSIX en los metadatos).

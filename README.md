@@ -19,7 +19,7 @@ quality, so researchers can compare experiments without silently mixing incompat
 | Dashboard | ✅ Done: real statistics only |
 | Experiment explorer (search, filters, sort, detail page) | ✅ Done |
 | Scientific comparator (rigor warnings, matrix, envelopes, atmosphere map) | ✅ Done |
-| AI assistant (RAG with verifiable citations) | ✅ Code done (Groq answers, [S#] citations checked server-side). ⚠️ **The index is not in the repository** (`data/processed/rag/` is gitignored): build it with [RAG_HANDOFF.md](RAG_HANDOFF.md) §8. Default search embeddings: Google API; local fastembed is also supported (`EMBEDDING_PROVIDER=local`) — a teammate built a local fastembed index (1,742 chunks, verified) that covers only 27 of the 71 planned PDFs — see RAG_HANDOFF.md §1. |
+| AI assistant (RAG with verifiable citations) | ✅ Done: FAISS index in the repository (4,392 chunks from 69 NASA PDFs + PSI records/tables, fastembed `bge-small-en-v1.5`), answers by Groq with [S#] citations checked server-side. Needs only `GROQ_API_KEY`. ⚠️ End-to-end answer not yet tested with real keys |
 | Safety insights: atmosphere coverage map, FLEX suppression, Saffire-II µg vs 1 g, BASS-II products, transparent relevance ranking (no risk scores) | ✅ Done |
 | Reports: question + investigations → Markdown/PDF with data, comparison, limitations, references (+ optional cited AI discussion) | ✅ Done |
 
@@ -29,11 +29,9 @@ Requirements: **Python 3.11+**, **Node.js 20+**, `make` (optional).
 
 ```bash
 git clone <repo> flame-intelligence && cd flame-intelligence
-cp .env.example .env            # add GROQ_API_KEY (answers) and GEMINI_API_KEY (search embeddings)
+cp .env.example .env            # add GROQ_API_KEY (answers); search uses the bundled index + local fastembed
 make setup                      # venv + Python deps + npm install
 make build-data                 # builds data/processed/flame.db from the snapshot in data/raw
-make data-docs                  # optional: ~70 PSI PDFs (~175 MB) for the AI assistant
-make rag                        # builds the RAG index with Google embeddings (see RAG_HANDOFF.md)
 ```
 
 Run in two terminals:
@@ -53,8 +51,8 @@ cd frontend && npm install && npm run dev
 ```
 
 The repository ships a **snapshot of the PSI data** (`data/raw/psi`), so the app runs offline. To refresh it from NASA
-(slow server: up to several minutes per record), run `make data`. Use `make data-docs` to also download about 70 PDF
-documents (~175 MB) for the AI assistant.
+(slow server: up to several minutes per record), run `make data`. The ~70 PSI PDFs (~175 MB), `flame.db` and the RAG
+index are also in the repository, so nothing has to be rebuilt to run the app.
 
 Tests: `make test` (parsers and API) · `make check` (also the TypeScript type-check).
 
@@ -134,8 +132,10 @@ Each investigation page links to its PSI landing page and dataset DOI.
    (final reports, science requirement documents, presentations), and NASA GRC fact sheets plus the ISS Researcher's Guide.
 2. **Chunking.** Page-aware chunks of ~1,400 characters with overlap (PyMuPDF); each keeps its title, investigation,
    page and URL.
-3. **Embeddings.** Google `gemini-embedding-001` (768 dimensions, L2-normalized) by default. A local CPU option is available
-   (`EMBEDDING_PROVIDER=local`, `BAAI/bge-small-en-v1.5`).
+3. **Embeddings.** fastembed `BAAI/bge-small-en-v1.5` (384 dimensions, L2-normalized) by default — the documents are
+   already embedded in the bundled index; at query time only the question is embedded (model ~65 MB, downloaded once).
+   Google `gemini-embedding-001` is available as an alternative (`EMBEDDING_PROVIDER=google`, requires rebuilding the
+   index and `GEMINI_API_KEY`).
 4. **Retrieval.** FAISS cosine search with at most 3 chunks per document. When the question names investigations
    (e.g. "FLEX vs BASS"), each of them is guaranteed to be represented. An optional scope limits the search to chosen
    investigations.
@@ -145,8 +145,7 @@ Each investigation page links to its PSI landing page and dataset DOI.
 6. **Verification.** Citations to non-existent sources are stripped and reported, and answers without valid citations
    are flagged. Each cited source links to the PDF page or the PSI landing page.
 7. **Graceful degradation.** Without a key for the generative model, the assistant runs in *retrieval-only* mode and
-   shows the most relevant NASA passages. Retrieval with Google embeddings still needs `GEMINI_API_KEY`.
-   Groq offers no embedding models, which is why search uses Google's embeddings API.
+   shows the most relevant NASA passages. Groq offers no embedding models, which is why search uses fastembed.
 
 Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md)**.
 
@@ -155,8 +154,8 @@ Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md
 - **Development assistance:** The project scaffolding, data pipeline, backend and frontend code were written with the help
   of an AI coding assistant (Anthropic Claude, via Claude Code), under the team's direction and review. The team owns the
   concept and design decisions.
-- **In the product:** answers are written by **Groq** (`openai/gpt-oss-120b`); document search uses Google's
-  `gemini-embedding-001` embeddings API. No AI model runs locally. Answers are grounded in retrieved NASA documents and must cite them.
+- **In the product:** answers are written by **Groq** (`openai/gpt-oss-120b`); document search uses the small
+  fastembed model `BAAI/bge-small-en-v1.5` on the backend machine (documents pre-embedded in the repository). Answers are grounded in retrieved NASA documents and must cite them.
 - **Data:** No data in the app is AI-generated. All values come from NASA PSI files. The curated classification in
   `curation.json` was drafted with AI assistance from the challenge text and PSI objectives, then reviewed by the team.
 
@@ -174,7 +173,7 @@ Full rebuild procedure, parameters and status: **[RAG_HANDOFF.md](RAG_HANDOFF.md
 
 | Task | Command | Why it is deferred |
 |---|---|---|
-| Build the RAG index (PDF extraction, Google embeddings, FAISS) | see [RAG_HANDOFF.md](RAG_HANDOFF.md) §8 | ~2,300 PDF pages + API batches |
+| Rebuild the RAG index (only when documents change) | `make rag` — see [RAG_HANDOFF.md](RAG_HANDOFF.md) §8 | ~2,300 PDF pages to extract and embed |
 | Production frontend build | `cd frontend && npm run build` | Vite/Rollup bundling of Plotly is memory-hungry |
 | Re-download PSI PDFs | `python pipeline/fetch_psi.py --docs` | ~175 MB from a slow server |
 
