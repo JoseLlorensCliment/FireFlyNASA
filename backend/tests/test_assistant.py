@@ -85,3 +85,25 @@ def test_missing_groq_key_gives_clear_error(monkeypatch):
         raise AssertionError("expected LLMUnavailable")
     except llm.LLMUnavailable as exc:
         assert "GROQ_API_KEY" in str(exc)
+
+
+def test_normalize_fullwidth_citations():
+    from app.ai.assistant import normalize_citations as n
+    assert n("A 【S1】.") == "A [S1]."
+    assert n("A 【1†L3-L5】.") == "A [S1]."              # line ranges are not source numbers
+    assert n("A 【S1, S3】.") == "A [S1][S3]."           # several sources in one bracket
+    assert n("A 【S2】【S4】.") == "A [S2][S4]."
+    assert n("A 【source】.") == "A 【source】."           # no number: left untouched
+    assert n("Plain [S2].") == "Plain [S2]."
+
+
+def test_fullwidth_citations_in_evidence_are_normalized(monkeypatch):
+    monkeypatch.setattr(assistant.retriever, "search", lambda q, k, accessions=None: [dict(c) for c in CHUNKS])
+    monkeypatch.setattr(assistant.retriever, "mentioned_accessions", lambda q: [])
+    monkeypatch.setattr(assistant, "complete_json", lambda s, u: ({
+        "answer": "FLEX tested CO2 【S1, S2】.",
+        "evidence": [{"statement": "CO2 tested 【1†L2-L4】", "sources": ["S1"]}],
+        "interpretation": [], "limitations": [], "sufficient": True, "follow_up": []}, "m"))
+    r = assistant.ask("fullwidth citations?")
+    assert r["answer"] == "FLEX tested CO2 [S1][S2]." and not r["warnings"]
+    assert r["evidence"][0]["statement"] == "CO2 tested [S1]"

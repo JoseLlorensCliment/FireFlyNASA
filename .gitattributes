@@ -1,0 +1,13 @@
+# Keep text files with LF line endings in the repository, whatever the OS of who commits
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Binary data: never touch line endings
+*.pdf binary
+*.db binary
+*.faiss binary
+*.npy binary
+*.zip binary
+*.png binary
+*.jpg binary

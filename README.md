@@ -19,7 +19,7 @@ quality, so researchers can compare experiments without silently mixing incompat
 | Dashboard | ✅ Done: real statistics only |
 | Experiment explorer (search, filters, sort, detail page) | ✅ Done |
 | Scientific comparator (rigor warnings, matrix, envelopes, atmosphere map) | ✅ Done |
-| AI assistant (RAG with verifiable citations) | ✅ Done: 1,742 chunks indexed, verifiable citations [S#] with Groq & fastembed |
+| AI assistant (RAG with verifiable citations) | ✅ Code done (Groq answers, [S#] citations checked server-side). ⚠️ **The index is not in the repository** (`data/processed/rag/` is gitignored): build it with [RAG_HANDOFF.md](RAG_HANDOFF.md) §8. Default search embeddings: Google API; local fastembed is also supported (`EMBEDDING_PROVIDER=local`) — a teammate built a local fastembed index (1,742 chunks, verified) that covers only 27 of the 71 planned PDFs — see RAG_HANDOFF.md §1. |
 | Safety insights: atmosphere coverage map, FLEX suppression, Saffire-II µg vs 1 g, BASS-II products, transparent relevance ranking (no risk scores) | ✅ Done |
 | Reports: question + investigations → Markdown/PDF with data, comparison, limitations, references (+ optional cited AI discussion) | ✅ Done |
 

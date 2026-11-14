@@ -40,3 +40,6 @@ Thumbs.db
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Archives of generated data (share them outside git)
+data/processed/*.zip

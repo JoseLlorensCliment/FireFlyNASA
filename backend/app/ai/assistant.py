@@ -34,6 +34,21 @@ Return a JSON object with exactly these keys:
 }"""
 
 CITE = re.compile(r"\[S(\d+)\]")
+FULLWIDTH_CITE = re.compile(r"【([^】]*)】")
+
+
+def normalize_citations(text: str) -> str:
+    """Convert model-specific citation styles to [S#].
+
+    gpt-oss models sometimes cite as 【S1】, 【1†L3-L5】 or 【S1, S3】. Only the part before
+    '†' is read (line ranges like L3-L5 are not source numbers). Brackets without a
+    source number are left untouched.
+    """
+    def repl(m: re.Match) -> str:
+        nums = re.findall(r"(?<![A-Za-z])S?(\d+)", m.group(1).split("†")[0])
+        return "".join(f"[S{n}]" for n in nums) if nums else m.group(0)
+
+    return FULLWIDTH_CITE.sub(repl, text or "")
 
 
 def _format_sources(chunks: list[dict]) -> str:
@@ -57,10 +72,11 @@ def _clean_items(items, valid: set[str]) -> list[dict]:
     out = []
     for it in items or []:
         if isinstance(it, str):
+            it = normalize_citations(it)
             it = {"statement": it, "sources": CITE.findall(it)}
         srcs = [s if str(s).startswith("S") else f"S{s}" for s in it.get("sources", [])]
         srcs = [s for s in srcs if s in valid]
-        out.append({"statement": str(it.get("statement", "")).strip(), "sources": srcs})
+        out.append({"statement": normalize_citations(str(it.get("statement", ""))).strip(), "sources": srcs})
     return [o for o in out if o["statement"]]
 
 
@@ -84,7 +100,7 @@ def _answer(question: str, accessions: tuple[str, ...], k: int) -> dict:
                        "limitations": [], "sufficient": None, "follow_up": [], "warnings": [str(exc)]}
 
     answer = str(data.get("answer", "")).strip()
-    answer = re.sub(r"【S?(\d+)[^】]*】", r"[S\1]", answer)
+    answer = normalize_citations(answer)
     warnings = []
     cited = set(f"S{n}" for n in CITE.findall(answer))
     invalid = cited - valid

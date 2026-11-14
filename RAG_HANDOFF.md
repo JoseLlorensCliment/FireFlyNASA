@@ -52,6 +52,8 @@
 | Código de servicio (retriever, LLM, citas) | ✅ Escrito y probado con tests simulados | `backend/app/ai/` |
 | Script de validación | ✅ Escrito y probado con un índice simulado | `pipeline/rag_smoke_test.py` |
 | Llamadas reales a Groq y a Google embeddings | ⚠️ **No probadas** (no había claves) | — |
+| Índice construido por un compañero con **fastembed local** (copiado a este equipo el 14 nov, `data/processed/rag/`, fuera de git) | ✅ **Estructura verificada aquí** (sin cargar modelos ni hacer consultas): 1 742 vectores de 384 dimensiones (`BAAI/bge-small-en-v1.5`), normalizados, `IndexFlatIP`; la huella de `chunks.jsonl` coincide con el manifest; 0 errores en `rag_smoke_test.check_index()`. ⚠️ **Corpus parcial:** solo indexa **27 PDF** (18 de PSI-10 y PSI-23, y los 9 de nasa.gov) más los registros y tablas del PSI, frente a los **71 PDF previstos**. ⚠️ Hay además una caché de Google **a medias** (17 de 35 lotes de `gemini-embedding-001`) | Para usarlo tal cual: `EMBEDDING_PROVIDER=local` (carga un modelo de unos 65 MB al buscar). Para completarlo: recuperar los PDF (fila siguiente) y relanzar `--stage chunks`, `embed` e `index` |
+| **PDF del PSI en este equipo** | ❌ **Al copiar la carpeta `data` se perdieron 49 de los 70 PDF del PSI** (quedan 21, solo de PSI-10 y PSI-23). No están en la papelera ni en git | Recuperar con `python pipeline/fetch_psi.py --docs` (unos 175 MB; servidor lento, de 30 a 90 min) o copiándolos de una copia completa. Verificar con el comando del §8, paso 4 |
 
 **Qué no hay que repetir:** la descarga de metadatos y CSV, la normalización (el código), el diseño de chunking y
 citas, la investigación de los modelos de Groq y Google, ni la fijación de versiones de las dependencias.
