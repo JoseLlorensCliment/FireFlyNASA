@@ -84,6 +84,7 @@ def _answer(question: str, accessions: tuple[str, ...], k: int) -> dict:
                        "limitations": [], "sufficient": None, "follow_up": [], "warnings": [str(exc)]}
 
     answer = str(data.get("answer", "")).strip()
+    answer = re.sub(r"【S?(\d+)[^】]*】", r"[S\1]", answer)
     warnings = []
     cited = set(f"S{n}" for n in CITE.findall(answer))
     invalid = cited - valid

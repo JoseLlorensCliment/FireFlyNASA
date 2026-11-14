@@ -19,7 +19,7 @@ quality, so researchers can compare experiments without silently mixing incompat
 | Dashboard | ✅ Done: real statistics only |
 | Experiment explorer (search, filters, sort, detail page) | ✅ Done |
 | Scientific comparator (rigor warnings, matrix, envelopes, atmosphere map) | ✅ Done |
-| AI assistant (RAG with verifiable citations) | ✅ Code done · ⏳ **index not built yet** — to be built on another machine (Google embeddings API), see [RAG_HANDOFF.md](RAG_HANDOFF.md) |
+| AI assistant (RAG with verifiable citations) | ✅ Done: 1,742 chunks indexed, verifiable citations [S#] with Groq & fastembed |
 | Safety insights: atmosphere coverage map, FLEX suppression, Saffire-II µg vs 1 g, BASS-II products, transparent relevance ranking (no risk scores) | ✅ Done |
 | Reports: question + investigations → Markdown/PDF with data, comparison, limitations, references (+ optional cited AI discussion) | ✅ Done |
 
